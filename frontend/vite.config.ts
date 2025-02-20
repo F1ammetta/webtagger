@@ -8,4 +8,10 @@ export default defineConfig({
     svelte(),
     tailwindcss()
   ],
+server: {
+    port: 3000,
+  },
+  build: {
+    target: 'esnext',
+  },
 })
