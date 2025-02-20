@@ -4,6 +4,7 @@ export interface MusicFile {
   format: string;
   size: number;
   path: string;
+  coverUrl: string;
   artist?: string;
   album?: string;
   title?: string;
