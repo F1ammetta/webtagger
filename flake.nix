@@ -1,5 +1,5 @@
 {
-  description = "A very basic flake";
+  description = "Web application for editing and managing audio metadata remotely";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-24.11";
