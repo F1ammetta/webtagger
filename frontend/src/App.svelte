@@ -26,10 +26,8 @@
 {:else}
   <Router {url}>
     <div class="min-h-screen bg-gray-900 text-gray-100">
-      <Route path="login" component={Login} />
-      <Route path="/" component={Dashboard}>
-        <!-- <Dashboard /> -->
-      </Route>
+      <Route path="/login" component={Login} />
+      <Route path="/" component={ProtectedRoute} />
       <Route path="*" component={NotFound} />
     </div>
   </Router>
