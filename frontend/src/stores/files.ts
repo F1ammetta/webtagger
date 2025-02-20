@@ -31,6 +31,7 @@ function createFileStore() {
           {
             id: '1',
             filename: 'bohemian_rhapsody.mp3',
+            coverUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkOFXzhaFxI2E7G5iBqHCJ5TxN_-LfnGoYQw&s',
             format: 'MP3',
             size: 8345678,
             path: '/music/queen/',
@@ -47,6 +48,7 @@ function createFileStore() {
           {
             id: '2',
             filename: 'hotel_california.flac',
+            coverUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkOFXzhaFxI2E7G5iBqHCJ5TxN_-LfnGoYQw&s',
             format: 'FLAC',
             size: 31457280,
             path: '/music/eagles/',
@@ -63,6 +65,7 @@ function createFileStore() {
           {
             id: '3',
             filename: 'billie_jean.mp3',
+            coverUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkOFXzhaFxI2E7G5iBqHCJ5TxN_-LfnGoYQw&s',
             format: 'MP3',
             size: 7234567,
             path: '/music/michael_jackson/',
@@ -79,6 +82,7 @@ function createFileStore() {
           {
             id: '4',
             filename: 'purple_haze.wav',
+            coverUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkOFXzhaFxI2E7G5iBqHCJ5TxN_-LfnGoYQw&s',
             format: 'WAV',
             size: 52428800,
             path: '/music/jimi_hendrix/',
@@ -95,6 +99,7 @@ function createFileStore() {
           {
             id: '5',
             filename: 'sweet_child_o_mine.aac',
+            coverUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkOFXzhaFxI2E7G5iBqHCJ5TxN_-LfnGoYQw&s',
             format: 'AAC',
             size: 5678912,
             path: '/music/guns_n_roses/',
@@ -111,6 +116,7 @@ function createFileStore() {
           {
             id: '6',
             filename: 'smells_like_teen_spirit.mp3',
+            coverUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkOFXzhaFxI2E7G5iBqHCJ5TxN_-LfnGoYQw&s',
             format: 'MP3',
             size: 7654321,
             path: '/music/nirvana/',
@@ -127,6 +133,7 @@ function createFileStore() {
           {
             id: '7',
             filename: 'lose_yourself.m4a',
+            coverUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkOFXzhaFxI2E7G5iBqHCJ5TxN_-LfnGoYQw&s',
             format: 'M4A',
             size: 8765432,
             path: '/music/eminem/',
@@ -143,6 +150,7 @@ function createFileStore() {
           {
             id: '8',
             filename: 'comfortably_numb.flac',
+            coverUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkOFXzhaFxI2E7G5iBqHCJ5TxN_-LfnGoYQw&s',
             format: 'FLAC',
             size: 38654321,
             path: '/music/pink_floyd/',
