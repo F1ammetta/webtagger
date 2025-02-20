@@ -107,14 +107,21 @@
             class="group cursor-pointer rounded-lg bg-gray-800 p-4 transition-all hover:bg-gray-700"
             on:click={() => onFileSelect(file)}
             on:keydown={(e) => e.key === "Enter" && onFileSelect(file)}
+            role="button"
             tabindex="0"
           >
             <div
               class="mb-2 flex h-24 items-center justify-center rounded bg-gray-900 text-cyan-500"
             >
-              <span class="material-symbols-outlined text-5xl"
-                >{getFileIcon(file)}</span
-              >
+              <!-- TODO: Replace with song cover image-->
+              <img
+                src={file.coverUrl}
+                class="overflow-hidden"
+                alt={file.filename}
+              />
+              <!-- <span class="material-symbols-outlined text-5xl" -->
+              <!--   >{getFileIcon(file)}</span -->
+              <!-- > -->
             </div>
             <div
               class="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium"
