@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { navigate } from "svelte-routing";
   import { authStore } from "../stores/auth";
+  import Dashboard from "../routes/Dashboard.svelte";
 
   let isAuthenticated: boolean;
 
@@ -12,11 +13,12 @@
   onMount(() => {
     if (!isAuthenticated) {
       navigate("/login", { replace: true });
+      window.location.reload();
     }
     return unsubscribe;
   });
 </script>
 
 {#if isAuthenticated}
-  <slot></slot>
+  <Dashboard />
 {/if}
