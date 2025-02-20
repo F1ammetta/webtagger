@@ -66,12 +66,18 @@
 </script>
 
 <div
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
   on:click={handleBackdropClick}
+  on:keydown={handleKeydown}
+  role="link"
+  tabindex="0"
 >
   <div
     class="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-lg bg-gray-800 shadow-xl"
     on:click|stopPropagation
+    role="link"
+    tabindex="0"
+    on:keydown={handleKeydown}
   >
     <div
       class="flex items-center justify-between border-b border-gray-700 px-6 py-4"
