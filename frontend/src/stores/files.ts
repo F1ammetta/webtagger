@@ -5,13 +5,15 @@ interface FileState {
   files: MusicFile[];
   loading: boolean;
   error: string | null;
+  layout: "grid" | "list";
 }
 
 function createFileStore() {
   const initialState: FileState = {
     files: [],
     loading: false,
-    error: null
+    error: null,
+    layout: "grid"
   };
 
   const { subscribe, set, update } = writable<FileState>(initialState);
@@ -30,6 +32,91 @@ function createFileStore() {
         const mockFiles: MusicFile[] = [
           {
             id: '1',
+            filename: 'bohemian_rhapsody.mp3',
+            coverUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkOFXzhaFxI2E7G5iBqHCJ5TxN_-LfnGoYQw&s',
+            format: 'MP3',
+            size: 8345678,
+            path: '/music/queen/',
+            artist: 'Queen',
+            album: 'A Night at the Opera',
+            title: 'Bohemian Rhapsody',
+            year: '1975',
+            genre: 'Rock',
+            trackNumber: '11',
+            bitrate: 320,
+            duration: 354,
+            sampleRate: 44100
+          },
+          {
+            id: '9',
+            filename: 'bohemian_rhapsody.mp3',
+            coverUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkOFXzhaFxI2E7G5iBqHCJ5TxN_-LfnGoYQw&s',
+            format: 'MP3',
+            size: 8345678,
+            path: '/music/queen/',
+            artist: 'Queen',
+            album: 'A Night at the Opera',
+            title: 'Bohemian Rhapsody',
+            year: '1975',
+            genre: 'Rock',
+            trackNumber: '11',
+            bitrate: 320,
+            duration: 354,
+            sampleRate: 44100
+          },
+          {
+            id: '10',
+            filename: 'bohemian_rhapsody.mp3',
+            coverUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkOFXzhaFxI2E7G5iBqHCJ5TxN_-LfnGoYQw&s',
+            format: 'MP3',
+            size: 8345678,
+            path: '/music/queen/',
+            artist: 'Queen',
+            album: 'A Night at the Opera',
+            title: 'Bohemian Rhapsody',
+            year: '1975',
+            genre: 'Rock',
+            trackNumber: '11',
+            bitrate: 320,
+            duration: 354,
+            sampleRate: 44100
+          },
+          {
+            id: '11',
+            filename: 'bohemian_rhapsody.mp3',
+            coverUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkOFXzhaFxI2E7G5iBqHCJ5TxN_-LfnGoYQw&s',
+            format: 'MP3',
+            size: 8345678,
+            path: '/music/queen/',
+            artist: 'Queen',
+            album: 'A Night at the Opera',
+            title: 'Bohemian Rhapsody',
+            year: '1975',
+            genre: 'Rock',
+            trackNumber: '11',
+            bitrate: 320,
+            duration: 354,
+            sampleRate: 44100
+          },
+          {
+            id: '12',
+            filename: 'bohemian_rhapsody.mp3',
+            coverUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkOFXzhaFxI2E7G5iBqHCJ5TxN_-LfnGoYQw&s',
+            format: 'MP3',
+            size: 8345678,
+            path: '/music/queen/',
+            artist: 'Queen',
+            album: 'A Night at the Opera',
+            title: 'Bohemian Rhapsody',
+            year: '1975',
+            genre: 'Rock',
+            trackNumber: '11',
+            bitrate: 320,
+            duration: 354,
+            sampleRate: 44100
+          },
+          {
+            id: '13',
             filename: 'bohemian_rhapsody.mp3',
             coverUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkOFXzhaFxI2E7G5iBqHCJ5TxN_-LfnGoYQw&s',
             format: 'MP3',
