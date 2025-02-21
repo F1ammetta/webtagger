@@ -104,24 +104,20 @@
       >
         {#each filteredFiles as file (file.id)}
           <div
-            class="group cursor-pointer rounded-lg bg-gray-800 p-4 transition-all hover:bg-gray-700"
+            class="group cursor-pointer rounded-lg bg-gray-800 p-4 transition-all hover:bg-gray-700 w-58"
             on:click={() => onFileSelect(file)}
             on:keydown={(e) => e.key === "Enter" && onFileSelect(file)}
             role="button"
             tabindex="0"
           >
             <div
-              class="mb-2 flex h-24 items-center justify-center rounded bg-gray-900 text-cyan-500"
+              class="mb-2 flex h-50 w-50 items-center justify-center rounded bg-gray-900 text-cyan-500"
             >
-              <!-- TODO: Replace with song cover image-->
               <img
                 src={file.coverUrl}
-                class="overflow-hidden"
+                class="overflow-hidden rounded"
                 alt={file.filename}
               />
-              <!-- <span class="material-symbols-outlined text-5xl" -->
-              <!--   >{getFileIcon(file)}</span -->
-              <!-- > -->
             </div>
             <div
               class="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium"
@@ -186,11 +182,13 @@
                 on:keydown={(e) => e.key === "Enter" && onFileSelect(file)}
                 tabindex="0"
               >
-                <td class="whitespace-nowrap px-6 py-4">
+                <td class="whitespace-nowrap px-4.5 py-2">
                   <div class="flex items-center">
-                    <span class="material-symbols-outlined mr-3 text-cyan-500"
-                      >{getFileIcon(file)}</span
-                    >
+                    <img
+                      src={file.coverUrl}
+                      class="overflow-hidden rounded h-15 mr-3"
+                      alt={file.filename}
+                    />
                     <span class="font-medium">{file.filename}</span>
                   </div>
                 </td>
