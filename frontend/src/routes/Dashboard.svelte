@@ -28,8 +28,8 @@
 <div class="flex h-screen flex-col">
   <Navbar />
 
-  <main class="flex-1 overflow-hidden">
-    <div class="container mx-auto h-full max-w-7xl px-4 py-6">
+  <main class="flex-1 overflow-y-auto">
+    <div class="container mx-auto max-w-7xl px-4 py-6 pb-40">
       <FileExplorer onFileSelect={handleFileSelect} />
     </div>
   </main>
