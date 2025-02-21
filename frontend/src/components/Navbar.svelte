@@ -18,7 +18,7 @@
   <div class="container mx-auto px-4">
     <div class="flex h-16 items-center justify-between">
       <div class="flex items-center">
-        <span class="text-xl font-bold text-cyan-500">Music Tag Editor</span>
+        <span class="text-xl font-bold text-cyan-500">Yggdrasil</span>
       </div>
 
       <div class="ml-4 flex items-center md:ml-6">
