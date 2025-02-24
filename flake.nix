@@ -14,11 +14,13 @@
       armDeps = with armPkgs; [
         go
         nodejs_18
+        tageditor
       ];
 
       deps = with pkgs; [
         go
         nodejs_18
+        tageditor
       ];
 
     in
