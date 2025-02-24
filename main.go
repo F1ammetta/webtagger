@@ -1,15 +1,15 @@
 package main
 
 import (
+	// "errors"
 	"fmt"
-	// "github.com/bogem/id3v2/v2"
-	"crypto/sha256"
-	"encoding/hex"
-	"io/fs"
-	"path/filepath"
+	"time"
+	// "strconv"
+	"github.com/ostafen/clover"
 )
 
-const musicDir = "/home/fiammetta/Music/"
+// const musicDir = "/home/fiammetta/Music/"
+const musicDir = "./"
 
 const (
 	scanning = "scanning"
@@ -17,12 +17,11 @@ const (
 )
 
 type Meta struct {
-	Title    string `json:"title"`
-	Artist   string `json:"artist"`
-	Album    string `json:"album"`
-	Year     int    `json:"year"`
-	Duration int    `json:"duration"`
-	Cover    string `json:"cover"` // base64 encoded image
+	Title  string `json:"title"`
+	Artist string `json:"artist"`
+	Album  string `json:"album"`
+	Genre  string `json:"genre"`
+	Year   int    `json:"year"`
 }
 
 type File struct {
@@ -35,55 +34,45 @@ type File struct {
 var files []File
 var filenames []string
 
-func walkHandler(path string, d fs.DirEntry, err error) error {
-	info, err := d.Info()
-
-	if err != nil {
-		fmt.Printf("err: %s", err)
-		return nil
-	}
-
-	name := info.Name()
-
-	size := float32(info.Size()) / 1000_000
-
-	hash := sha256.New()
-	hash.Write([]byte(name))
-	hashed := hash.Sum(nil)
-	uid := hex.EncodeToString(hashed)
-
-	files = append(files, File{
-		Name: name, Size: size, Uid: uid,
-	})
-
-	return nil
-}
-
-func scanner(status chan (string)) error {
-
-	// status <- scanning
-
-	err := filepath.WalkDir(musicDir, walkHandler)
-
-	if err != nil {
-		fmt.Printf("err: %s", err)
-	}
-
-	fmt.Println((files))
-
-	// status <- ready
-	status <- ready
-	return nil
-}
-
-func stats(status chan (string)) {}
-
 func main() {
 	status := make(chan string)
 
+	// meta, err := gatherMetadata("1-01 PSYCHO.flac")
+	//
+	// fmt.Println(meta)
+
+	initDb()
+
+	// err := editMetadata(
+	// 	"1-01 PSYCHO.flac",
+	// 	"soyeon.jpg",
+	// 	Meta{
+	// 		Title:  "sexo",
+	// 		Artist: "tilin",
+	// 		Album:  "prrr",
+	// 		Year:   2032,
+	// 		Genre:  "Huh",
+	// 	},
+	// )
+
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
 	go scanner(status)
 
-	go stats(status)
+	// go stats(status)
 
 	<-status
+	<-time.After(3 * time.Second)
+
+	db, err := clover.Open("./data")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	song := findSong(db, id)
+
+	fmt.Println(song)
 }
