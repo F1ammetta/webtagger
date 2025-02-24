@@ -8,8 +8,9 @@ import (
 	"github.com/ostafen/clover"
 )
 
-// const musicDir = "/home/fiammetta/Music/"
-const musicDir = "./"
+const musicDir = "/home/fiammetta/Music/"
+
+// const musicDir = "./"
 
 const (
 	scanning = "scanning"
@@ -31,11 +32,9 @@ type File struct {
 	Metadata Meta    `json:"metadata"`
 }
 
-var files []File
 var filenames []string
 
 func main() {
-	status := make(chan string)
 
 	// meta, err := gatherMetadata("1-01 PSYCHO.flac")
 	//
@@ -59,12 +58,13 @@ func main() {
 	// 	fmt.Println(err)
 	// }
 
+	status := make(chan string)
 	go scanner(status)
 
 	// go stats(status)
 
 	<-status
-	<-time.After(3 * time.Second)
+	<-time.After(2 * time.Second)
 
 	db, err := clover.Open("./data")
 	if err != nil {
@@ -72,7 +72,10 @@ func main() {
 	}
 	defer db.Close()
 
-	song := findSong(db, id)
+	songs := getSongs(db)
 
-	fmt.Println(song)
+	fmt.Println(songs)
+
+	// song := songInDb(db, "c1e9f5258e12594a710166176e8bdc2d6f415455937ec3aa9362a21f284a2b08")
+	// fmt.Println(song)
 }

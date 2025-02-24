@@ -68,8 +68,6 @@ func handleInserts() {
 	}
 	defer db.Close()
 
-	c := 0
-
 	for {
 		file := <-fileChan
 
@@ -78,8 +76,6 @@ func handleInserts() {
 		}
 
 		insertSong(db, file)
-		c += 1
-		fmt.Println(c)
 	}
 
 }
@@ -99,8 +95,6 @@ func scanner(status chan (string)) {
 	fileChan <- File{
 		Uid: "",
 	}
-
-	fmt.Println(len(files))
 
 	// status <- ready
 	status <- ready

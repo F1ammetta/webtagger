@@ -81,10 +81,13 @@ func gatherMetadata(filePath string) (Meta, error) {
 		line := strings.TrimSpace(line)
 		vals := strings.Fields(line)
 
-		val := vals[len(vals)-1]
+		fmt.Println(vals)
+
+		val := strings.Join(vals[1:], " ")
 
 		switch i {
 		case DATE:
+			val = strings.Join(vals[2:], " ")
 			metadata.Year, _ = strconv.Atoi(val)
 		case GENRE:
 			metadata.Genre = val

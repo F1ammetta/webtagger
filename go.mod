@@ -2,15 +2,11 @@ module webtagger
 
 go 1.23.5
 
-require (
-	github.com/ostafen/clover v1.2.0
-	github.com/stretchr/testify v1.7.1
-)
+require github.com/ostafen/clover v1.2.0
 
 require (
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgraph-io/badger/v3 v3.2103.2 // indirect
 	github.com/dgraph-io/ristretto v0.1.0 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
@@ -22,11 +18,9 @@ require (
 	github.com/google/flatbuffers v2.0.6+incompatible // indirect
 	github.com/klauspost/compress v1.15.9 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/net v0.0.0-20220728211354-c7608f3a8462 // indirect
 	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
 )
