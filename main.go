@@ -2,15 +2,16 @@ package main
 
 import (
 	// "errors"
+	"context"
 	"fmt"
 	"time"
 	// "strconv"
-	"github.com/ostafen/clover"
+	// "github.com/ostafen/clover"
 )
 
-const musicDir = "/home/fiammetta/Music/"
+// const musicDir = "/home/fiammetta/Music/"
 
-// const musicDir = "./"
+const musicDir = "./"
 
 const (
 	scanning = "scanning"
@@ -35,6 +36,7 @@ type File struct {
 var filenames []string
 
 func main() {
+	ctx, _ := context.WithCancel(context.Background())
 
 	// meta, err := gatherMetadata("1-01 PSYCHO.flac")
 	//
@@ -58,21 +60,33 @@ func main() {
 	// 	fmt.Println(err)
 	// }
 
+	eventChan = make(chan (DbEvent))
+
+	go eventLoop(ctx)
+
+	<-time.After(time.Second)
+
 	status := make(chan string)
 	go scanner(status)
 
 	// go stats(status)
 
 	<-status
-	<-time.After(2 * time.Second)
 
-	db, err := clover.Open("./data")
-	if err != nil {
-		panic(err)
+	fmt.Println("caca")
+
+	songsChan := make(chan (DbResult), 1)
+	getEvent := DbEvent{
+		eventType:  All,
+		data:       nil,
+		resultChan: songsChan,
 	}
-	defer db.Close()
 
-	songs := getSongs(db)
+	dispatch(getEvent)
+
+	result := <-songsChan
+
+	songs := result.data.([]File)
 
 	fmt.Println(songs)
 

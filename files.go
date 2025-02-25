@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/ostafen/clover"
 	"io/fs"
 	"path/filepath"
 	"slices"
@@ -54,46 +53,31 @@ func walkHandler(path string, d fs.DirEntry, err error) error {
 
 	metadata, err := gatherMetadata(path)
 
-	fileChan <- File{
+	file := File{
 		Name: name, Size: size, Uid: uid, Metadata: metadata,
 	}
+
+	noChan := make(chan DbResult, 1)
+
+	event := DbEvent{
+		eventType:  Insert,
+		data:       file,
+		resultChan: noChan,
+	}
+
+	fmt.Println(file.Name)
+
+	go dispatch(event)
 
 	return nil
 }
 
-func handleInserts() {
-	db, err := clover.Open("./data")
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
-	for {
-		file := <-fileChan
-
-		if file.Uid == "" {
-			break
-		}
-
-		insertSong(db, file)
-	}
-
-}
-
 func scanner(status chan (string)) {
-	// status <- scanning
-	fileChan = make(chan File)
-
-	go handleInserts()
 
 	err := filepath.WalkDir(musicDir, walkHandler)
 
 	if err != nil {
 		fmt.Printf("err: %s", err)
-	}
-
-	fileChan <- File{
-		Uid: "",
 	}
 
 	// status <- ready

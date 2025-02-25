@@ -81,7 +81,7 @@ func gatherMetadata(filePath string) (Meta, error) {
 		line := strings.TrimSpace(line)
 		vals := strings.Fields(line)
 
-		fmt.Println(vals)
+		// fmt.Println(vals)
 
 		val := strings.Join(vals[1:], " ")
 
