@@ -73,8 +73,6 @@ func main() {
 
 	<-status
 
-	fmt.Println("caca")
-
 	songsChan := make(chan (DbResult), 1)
 	getEvent := DbEvent{
 		eventType:  All,

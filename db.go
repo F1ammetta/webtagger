@@ -11,11 +11,9 @@ import (
 func insertSong(db *clover.DB, song File) error {
 	doc := clover.NewDocumentOf(song)
 
-	fmt.Println("achoo")
 	if songInDb(db, song.Uid) {
 		return errors.New("Song already in DB")
 	}
-	fmt.Println("salud")
 
 	err := db.Insert("songs", doc)
 	if err != nil {
@@ -119,8 +117,6 @@ func handleEvent(db *clover.DB, event DbEvent) {
 	case Insert:
 		file := event.data.(File)
 
-		fmt.Println("pene")
-
 		if file.Uid == "" {
 			result <- DbResult{
 				data: nil,
@@ -129,19 +125,16 @@ func handleEvent(db *clover.DB, event DbEvent) {
 			return
 		}
 
-		fmt.Println("pene2")
 		if err := insertSong(db, file); err != nil {
 			result <- DbResult{
 				data: nil,
 				err:  err,
 			}
-			fmt.Println("pene3")
 		} else {
 			result <- DbResult{
 				data: nil,
 				err:  nil,
 			}
-			fmt.Println("pene4")
 		}
 
 		return
