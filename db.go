@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/ostafen/clover"
 )
@@ -86,10 +87,11 @@ const (
 	Edit
 	Delete
 	All
+	Scan
 )
 
 func (e EventType) String() string {
-	return [...]string{"Unknown", "Insert", "Query", "Edit", "Delete", "All"}[e]
+	return [...]string{"Unknown", "Insert", "Query", "Edit", "Delete", "All", "Scan"}[e]
 }
 
 type DbEvent struct {
@@ -106,11 +108,45 @@ type DbResult struct {
 
 var eventChan chan (DbEvent)
 
+type DbStatus int
+
+const (
+	IO DbStatus = iota + 1
+	SCANNING
+	IDLE
+)
+
+func (e DbStatus) String() string {
+	return [...]string{"IO", "SCANNING", "IDLE"}[e]
+}
+
+var dbStatus DbStatus
+
+func setStatus(eventType EventType) {
+	switch eventType {
+	case Query, All, Insert, Delete, Edit:
+		dbStatus = IO
+	case Scan:
+		dbStatus = SCANNING
+	}
+}
+
 func dispatch(event DbEvent) {
-	eventChan <- event
+	switch dbStatus {
+	case IO, IDLE:
+		eventChan <- event
+	case SCANNING:
+		result := event.resultChan
+		defer close(result)
+		result <- DbResult{
+			data: nil,
+			err:  errors.New("Scanning File System, database not accesible"),
+		}
+	}
 }
 
 func handleEvent(db *clover.DB, event DbEvent) {
+	setStatus(event.eventType)
 	result := event.resultChan
 	defer close(result)
 	switch event.eventType {
@@ -163,6 +199,8 @@ func handleEvent(db *clover.DB, event DbEvent) {
 
 	case Delete:
 
+	case Scan:
+
 	}
 }
 
@@ -179,8 +217,9 @@ func eventLoop(ctx context.Context) {
 			return
 
 		case event := <-eventChan:
-			fmt.Println("Received event:", event.eventType.String())
+			log.Output(1, fmt.Sprintf("Received event: %s", event.eventType.String()))
 			handleEvent(db, event)
+			dbStatus = IDLE
 		}
 	}
 
