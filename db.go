@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/ostafen/clover"
 )
@@ -82,7 +81,7 @@ func songInDb(db *clover.DB, uid string) bool {
 type EventType int
 
 const (
-	Insert EventType = iota + 1
+	Insert EventType = iota
 	Query
 	Edit
 	Delete
@@ -91,7 +90,7 @@ const (
 )
 
 func (e EventType) String() string {
-	return [...]string{"Unknown", "Insert", "Query", "Edit", "Delete", "All", "Scan"}[e]
+	return [...]string{"Insert", "Query", "Edit", "Delete", "All", "Scan"}[e]
 }
 
 type DbEvent struct {
@@ -111,7 +110,7 @@ var eventChan chan (DbEvent)
 type DbStatus int
 
 const (
-	IO DbStatus = iota + 1
+	IO DbStatus = iota
 	SCANNING
 	IDLE
 )
@@ -138,10 +137,13 @@ func dispatch(event DbEvent) {
 	case SCANNING:
 		result := event.resultChan
 		defer close(result)
+		infoLog("Rejected event", event.eventType.String())
 		result <- DbResult{
 			data: nil,
 			err:  errors.New("Scanning File System, database not accesible"),
 		}
+	default:
+		eventChan <- event
 	}
 }
 
@@ -200,11 +202,13 @@ func handleEvent(db *clover.DB, event DbEvent) {
 	case Delete:
 
 	case Scan:
+		scanner()
 
 	}
 }
 
 func eventLoop(ctx context.Context) {
+	dbStatus = IDLE
 	db, err := clover.Open("./data")
 	if err != nil {
 		panic(err)
@@ -217,7 +221,7 @@ func eventLoop(ctx context.Context) {
 			return
 
 		case event := <-eventChan:
-			log.Output(1, fmt.Sprintf("Received event: %s", event.eventType.String()))
+			infoLog("DB Event", event.eventType.String())
 			handleEvent(db, event)
 			dbStatus = IDLE
 		}
