@@ -65,8 +65,6 @@ func walkHandler(path string, d fs.DirEntry, err error) error {
 		resultChan: noChan,
 	}
 
-	fmt.Println(file.Name)
-
 	go dispatch(event)
 
 	return nil

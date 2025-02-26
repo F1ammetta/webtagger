@@ -9,9 +9,9 @@ import (
 	// "github.com/ostafen/clover"
 )
 
-// const musicDir = "/home/fiammetta/Music/"
+const musicDir = "/home/fiammetta/Music/"
 
-const musicDir = "./"
+// const musicDir = "./"
 
 const (
 	scanning = "scanning"
