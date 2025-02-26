@@ -19,7 +19,6 @@ var id = ""
 var fileChan chan (File)
 
 func walkHandler(path string, d fs.DirEntry, err error) error {
-
 	info, err := d.Info()
 
 	temp := strings.Split(path, ".")
@@ -70,14 +69,11 @@ func walkHandler(path string, d fs.DirEntry, err error) error {
 	return nil
 }
 
-func scanner(status chan (string)) {
-
+func scanner() {
 	err := filepath.WalkDir(musicDir, walkHandler)
 
 	if err != nil {
 		fmt.Printf("err: %s", err)
 	}
 
-	// status <- ready
-	status <- ready
 }
