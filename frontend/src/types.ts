@@ -1,17 +1,15 @@
 export interface MusicFile {
-  id: string;
-  filename: string;
-  format: string;
+  uid: string;
+  name: string;
   size: number;
-  path: string;
-  coverUrl: string;
-  artist?: string;
-  album?: string;
-  title?: string;
-  year?: string;
-  genre?: string;
-  trackNumber?: string;
-  bitrate?: number;
-  duration: number;
-  sampleRate?: number;
+  metadata: Metadata;
+}
+
+export interface Metadata {
+  title: string;
+  artist: string;
+  album: string;
+  year: string;
+  genre: string;
+  // coverUrl: string;
 }

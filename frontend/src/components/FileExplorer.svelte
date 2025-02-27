@@ -14,10 +14,14 @@
   $: filteredFiles = searchQuery
     ? files.filter(
         (file) =>
-          file.filename.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          file.artist?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          file.album?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          file.title?.toLowerCase().includes(searchQuery.toLowerCase()),
+          file.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          file.metadata.artist
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          file.metadata.album
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          file.metadata.title.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     : files;
 
@@ -27,7 +31,7 @@
   });
 
   function getFileIcon(file: MusicFile) {
-    const extension = file.filename.split(".").pop()?.toLowerCase();
+    const extension = file.name.split(".").pop()?.toLowerCase();
 
     switch (extension) {
       case "mp3":
@@ -102,7 +106,7 @@
       <div
         class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
       >
-        {#each filteredFiles as file (file.id)}
+        {#each filteredFiles as file (file.uid)}
           <div
             class="group cursor-pointer rounded-lg bg-gray-800 p-4 transition-all hover:bg-gray-700 w-58"
             on:click={() => onFileSelect(file)}
@@ -114,24 +118,24 @@
               class="mb-2 flex h-50 w-50 items-center justify-center rounded bg-gray-900 text-cyan-500"
             >
               <img
-                src={file.coverUrl}
+                src="http://localhost:8080/cover/{file.uid}"
                 class="overflow-hidden rounded"
-                alt={file.filename}
+                alt={file.name}
               />
             </div>
             <div
               class="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium"
             >
-              {file.filename}
+              {file.metadata.title}
             </div>
             <div class="text-xs text-gray-400">
-              {file.artist
-                ? `${file.artist} - ${file.album || "Unknown Album"}`
+              {file.metadata.artist
+                ? `${file.metadata.artist} - ${file.metadata.album || "Unknown Album"}`
                 : "Unknown Artist"}
             </div>
             <div class="mt-1 flex justify-between text-xs text-gray-500">
               <span>{formatFileSize(file.size)}</span>
-              <span>{file.format}</span>
+              <!-- <span>{file.format}</span> -->
             </div>
           </div>
         {/each}
@@ -175,7 +179,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-700 bg-gray-800">
-            {#each filteredFiles as file (file.id)}
+            {#each filteredFiles as file (file.uid)}
               <tr
                 class="cursor-pointer transition-colors hover:bg-gray-700"
                 on:click={() => onFileSelect(file)}
@@ -185,22 +189,22 @@
                 <td class="whitespace-nowrap px-4.5 py-2">
                   <div class="flex items-center">
                     <img
-                      src={file.coverUrl}
+                      src="http://localhost:8080/cover/{file.uid}"
                       class="overflow-hidden rounded h-15 mr-3"
-                      alt={file.filename}
+                      alt={file.metadata.title}
                     />
-                    <span class="font-medium">{file.filename}</span>
+                    <span class="font-medium">{file.name}</span>
                   </div>
                 </td>
                 <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-300">
-                  {file.artist || "Unknown"}
+                  {file.metadata.artist || "Unknown"}
                 </td>
                 <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-300">
-                  {file.album || "Unknown"}
+                  {file.metadata.album || "Unknown"}
                 </td>
-                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-300">
-                  {file.format}
-                </td>
+                <!-- <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-300"> -->
+                <!--   {file.format} -->
+                <!-- </td> -->
                 <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-300">
                   {formatFileSize(file.size)}
                 </td>
