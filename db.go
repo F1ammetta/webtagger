@@ -131,20 +131,20 @@ func setStatus(eventType EventType) {
 }
 
 func dispatch(event DbEvent) {
-	switch dbStatus {
-	case IO, IDLE:
-		eventChan <- event
-	case SCANNING:
-		result := event.resultChan
-		defer close(result)
-		infoLog("Rejected event", event.eventType.String())
-		result <- DbResult{
-			data: nil,
-			err:  errors.New("Scanning File System, database not accesible"),
-		}
-	default:
-		eventChan <- event
-	}
+	// switch dbStatus {
+	// case IO, IDLE:
+	eventChan <- event
+	// case SCANNING:
+	// 	result := event.resultChan
+	// 	defer close(result)
+	// 	infoLog("Rejected event", event.eventType.String())
+	// 	result <- DbResult{
+	// 		data: nil,
+	// 		err:  errors.New("Scanning File System, database not accesible"),
+	// 	}
+	// default:
+	// 	eventChan <- event
+	// }
 }
 
 func handleEvent(db *clover.DB, event DbEvent) {
@@ -203,7 +203,6 @@ func handleEvent(db *clover.DB, event DbEvent) {
 
 	case Scan:
 		scanner()
-
 	}
 }
 
