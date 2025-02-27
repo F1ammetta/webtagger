@@ -5,6 +5,21 @@ import (
 	"net/http"
 )
 
+func scanHandler(w http.ResponseWriter, r *http.Request) {
+	infoLog("Incoming GET @ /scan")
+	result := make(chan (DbResult), 1)
+
+	scanEvent := DbEvent{
+		eventType:  Scan,
+		data:       nil,
+		resultChan: result,
+	}
+
+	dispatch(scanEvent)
+
+	w.Write([]byte("{\"status\": \"scanning\"}"))
+}
+
 func songsHandler(w http.ResponseWriter, r *http.Request) {
 	infoLog("Incoming GET @ /songs")
 
