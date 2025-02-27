@@ -202,7 +202,7 @@ func handleEvent(db *clover.DB, event DbEvent) {
 	case Delete:
 
 	case Scan:
-		scanner()
+		go scanner()
 	}
 }
 
