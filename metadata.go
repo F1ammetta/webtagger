@@ -53,6 +53,24 @@ const (
 	TITLE  = 4
 )
 
+func getCover(filePath string) ([]byte, error) {
+	cmd := exec.Command(
+		"tageditor",
+		"-e",
+		"cover",
+		"-f",
+		filePath,
+	)
+
+	out, err := cmd.Output()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return out, nil
+}
+
 func gatherMetadata(filePath string) (Meta, error) {
 	metadata := Meta{}
 
