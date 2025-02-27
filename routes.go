@@ -20,6 +20,34 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("{\"status\": \"scanning\"}"))
 }
 
+func coverHandler(w http.ResponseWriter, r *http.Request) {
+	infoLog("Incoming GET @ /cover")
+
+	uid := r.PathValue("uid")
+
+	resChan := make(chan DbResult)
+
+	dbE := DbEvent{
+		eventType:  Query,
+		data:       uid,
+		resultChan: resChan,
+	}
+
+	dispatch(dbE)
+
+	res := <-resChan
+
+	file := res.data.(File)
+
+	cover, err := getCover(file.Name)
+
+	if err != nil {
+		errLog(err)
+	}
+
+	w.Write(cover)
+}
+
 func songsHandler(w http.ResponseWriter, r *http.Request) {
 	infoLog("Incoming GET @ /songs")
 
