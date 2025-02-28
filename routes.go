@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 )
 
 func scanHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +64,13 @@ func coverHandler(w http.ResponseWriter, r *http.Request) {
 	cover, err := getCover(file.Name)
 
 	if err != nil {
-		errLog(err)
+		file, err := os.ReadFile("./frontend/album.svg")
+		if err != nil {
+			errLog(err, "Couldn't fetch cover")
+		}
+
+		w.Header().Add("Content-Type", "image/svg+xml")
+		w.Write(file)
 	}
 
 	w.Write(cover)
