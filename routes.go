@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -18,6 +19,26 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
 	dispatch(scanEvent)
 
 	w.Write([]byte("{\"status\": \"scanning\"}"))
+}
+
+func editHandler(w http.ResponseWriter, r *http.Request) {
+	infoLog("Incoming POST @ /edit")
+
+	// uid := r.PathValue("uid")
+
+	var body []byte
+
+	if _, err := r.Body.Read(body); err != nil {
+		errLog(err)
+	}
+
+	var file File
+
+	if err := json.Unmarshal(body, file); err != nil {
+		errLog(err)
+	}
+
+	fmt.Println(file)
 }
 
 func coverHandler(w http.ResponseWriter, r *http.Request) {
