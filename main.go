@@ -50,7 +50,10 @@ func main() {
 
 	http.HandleFunc("/songs", songsHandler)
 	http.HandleFunc("/scan", scanHandler)
-	http.HandleFunc("/cover/{uid}", coverHandler)
+	http.HandleFunc("/cover/get/{uid}", coverHandler)
+
+	// http.HandleFunc("/edit/{uid}")
+	// http.HandleFunc("/cover/set/{uid}")
 
 	fmt.Println("listening on http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
@@ -63,6 +66,6 @@ func infoLog(s ...string) {
 	log.Output(1, fmt.Sprintf("INFO: %s", s))
 }
 
-func errLog(e error) {
-	log.Output(1, fmt.Sprintf("ERROR: %s", e.Error()))
+func errLog(e error, s ...string) {
+	log.Output(1, fmt.Sprintf("ERROR: %s %s", s, e.Error()))
 }
