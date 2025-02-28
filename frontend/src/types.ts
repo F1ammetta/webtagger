@@ -5,6 +5,11 @@ export interface MusicFile {
   metadata: Metadata;
 }
 
+export interface CoverUpdate {
+  update: boolean;
+  bytes: Uint8Array;
+}
+
 export interface Metadata {
   title: string;
   artist: string;
