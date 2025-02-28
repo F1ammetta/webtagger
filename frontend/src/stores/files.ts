@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import type { MusicFile } from "../types";
+import type { MusicFile, CoverUpdate } from "../types";
 
 interface FileState {
   files: MusicFile[];
@@ -20,13 +20,27 @@ function createFileStore() {
 
   return {
     subscribe,
+    changeLayout: async (layout: "grid" | "list") => {
+      localStorage.setItem("layout", layout);
+      update((state) => ({ ...state, layout: layout }));
+    },
     loadFiles: async () => {
       update((state) => ({ ...state, loading: true, error: null }));
 
       try {
         // In production, this would be a real API call
         // Simulating API delay
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        function getLayout(): "grid" | "list" {
+          const val = localStorage.getItem("layout");
+          if (val === "grid" || val === "list") {
+            return val;
+          }
+          return "grid";
+        }
+
+        const layout = getLayout();
+
+        update((state) => ({ ...state, layout: layout }));
 
         // Mock data response
         let files: MusicFile[] = [];
@@ -39,7 +53,7 @@ function createFileStore() {
 
 
 
-        update((state) => ({ ...state, files: files, loading: false }));
+        update((state) => ({ ...state, files: files, loading: false, }));
       } catch (error) {
         console.error("Failed to load files:", error);
         update((state) => ({
@@ -49,13 +63,26 @@ function createFileStore() {
         }));
       }
     },
-    updateFile: async (updatedFile: MusicFile) => {
+    updateFile: async (updatedFile: MusicFile, cover: CoverUpdate) => {
       update((state) => {
         // In production, this would be a real API call
         // For now, update the local state
-        const updatedFiles = state.files.map((file) =>
-          file.uid === updatedFile.uid ? updatedFile : file
-        );
+        //
+        var updatedFiles: MusicFile[] = []
+
+        fetch(`http://localhost:8080/edit/${updatedFile.uid}`, {
+          method: "POST",
+          body: JSON.stringify(updatedFile),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8"
+          },
+        }).then((res) => {
+          if (res.ok) {
+            updatedFiles = state.files.map((file) =>
+              file.uid === updatedFile.uid ? updatedFile : file
+            );
+          }
+        })
 
         return { ...state, files: updatedFiles };
       });
