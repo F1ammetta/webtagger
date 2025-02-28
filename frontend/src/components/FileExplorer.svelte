@@ -3,13 +3,14 @@
   import { fileStore } from "../stores/files";
   import type { MusicFile } from "../types";
   import { formatFileSize } from "../utils/formatters";
+  import { Layout } from "lucide-svelte";
 
   export let onFileSelect: (file: MusicFile) => void;
 
   let files: MusicFile[] = [];
   let isLoading = true;
   let searchQuery = "";
-  let viewMode: "grid" | "list" = "grid";
+  let viewMode: "grid" | "list";
 
   $: filteredFiles = searchQuery
     ? files.filter(
@@ -28,6 +29,7 @@
   const unsubscribe = fileStore.subscribe((state) => {
     files = state.files;
     isLoading = state.loading;
+    viewMode = state.layout;
   });
 
   function getFileIcon(file: MusicFile) {
@@ -72,15 +74,15 @@
 
     <div class="flex items-center gap-2">
       <button
-        class={`rounded-md p-2 ${viewMode === "grid" ? "bg-gray-700 text-cyan-400" : "text-gray-400"}`}
-        on:click={() => (viewMode = "grid")}
+        class={`rounded-md p-2 pb-0.5 ${viewMode === "grid" ? "bg-gray-700  text-cyan-400" : "text-gray-400"}`}
+        on:click={() => fileStore.changeLayout("grid")}
         title="Grid view"
       >
         <span class="material-symbols-outlined">grid_view</span>
       </button>
       <button
-        class={`rounded-md p-2 ${viewMode === "list" ? "bg-gray-700 text-cyan-400" : "text-gray-400"}`}
-        on:click={() => (viewMode = "list")}
+        class={`rounded-md p-2 pb-0.5 ${viewMode === "list" ? "bg-gray-700 text-cyan-400" : "text-gray-400"}`}
+        on:click={() => fileStore.changeLayout("list")}
         title="List view"
       >
         <span class="material-symbols-outlined">view_list</span>
@@ -118,8 +120,9 @@
               class="mb-2 flex h-50 w-50 items-center justify-center rounded bg-gray-900 text-cyan-500"
             >
               <img
-                src="http://localhost:8080/cover/{file.uid}"
+                src="http://localhost:8080/cover/get/{file.uid}"
                 class="overflow-hidden rounded"
+                loading="lazy"
                 alt={file.name}
               />
             </div>
@@ -164,12 +167,6 @@
               >
                 Album
               </th>
-              <!-- <th -->
-              <!--   scope="col" -->
-              <!--   class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400" -->
-              <!-- > -->
-              <!--   Format -->
-              <!-- </th> -->
               <th
                 scope="col"
                 class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400"
@@ -186,26 +183,29 @@
                 on:keydown={(e) => e.key === "Enter" && onFileSelect(file)}
                 tabindex="0"
               >
-                <td class="whitespace-nowrap px-4.5 py-2">
+                <td class="whitespace-nowarp px-4.5 py-2">
                   <div class="flex items-center">
                     <img
-                      src="http://localhost:8080/cover/{file.uid}"
+                      src="http://localhost:8080/cover/get/{file.uid}"
                       class="overflow-hidden rounded h-15 mr-3"
+                      loading="lazy"
                       alt={file.metadata.title}
                     />
-                    <span class="font-medium">{file.metadata.title}</span>
+                    <span class="font-medium w-64 truncate">
+                      {file.metadata.title}</span
+                    >
                   </div>
                 </td>
-                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-300">
+                <td class="w-64 px-6 py-4 text-sm text-gray-300">
                   {file.metadata.artist || "Unknown"}
                 </td>
-                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-300">
+                <td class="w-64 px-6 py-4 text-sm text-gray-300">
                   {file.metadata.album || "Unknown"}
                 </td>
-                <!-- <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-300"> -->
+                <!-- <td class="whitespace-nowarp px-6 py-4 text-sm text-gray-300"> -->
                 <!--   {file.format} -->
                 <!-- </td> -->
-                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-300">
+                <td class="px-6 py-4 text-sm text-gray-300">
                   {formatFileSize(file.size)}
                 </td>
               </tr>
