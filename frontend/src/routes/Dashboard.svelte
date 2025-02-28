@@ -4,7 +4,7 @@
   import FileExplorer from "../components/FileExplorer.svelte";
   import FileTagEditor from "../components/FileTagEditor.svelte";
   import { fileStore } from "../stores/files";
-  import type { MusicFile } from "../types";
+  import type { MusicFile, CoverUpdate } from "../types";
 
   let selectedFile: MusicFile | null = null;
   let isTagEditorOpen = false;
@@ -38,8 +38,8 @@
     <FileTagEditor
       file={selectedFile}
       onClose={closeTagEditor}
-      onSave={(updatedFile) => {
-        fileStore.updateFile(updatedFile);
+      onSave={(updatedFile, cover) => {
+        fileStore.updateFile(updatedFile, cover);
         closeTagEditor();
       }}
     />
