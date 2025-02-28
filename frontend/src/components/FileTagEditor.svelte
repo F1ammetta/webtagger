@@ -1,47 +1,26 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from "svelte";
-  import type { MusicFile } from "../types";
+  import type { CoverUpdate, MusicFile } from "../types";
   import { formatDuration } from "../utils/formatters";
+  import type { HTMLInputEvent } from "../types";
+  import type { ChangeEventHandler } from "svelte/elements";
 
   export let file: MusicFile;
   export let onClose: () => void;
-  export let onSave: (file: MusicFile) => void;
+  export let onSave: (file: MusicFile, cover: CoverUpdate) => void;
 
   let editedFile: MusicFile = { ...file };
   let isLoading = false;
-  let activeTab: "basic" | "advanced" = "basic";
 
-  const genres = [
-    "Rock",
-    "Pop",
-    "Hip Hop",
-    "R&B",
-    "Electronic",
-    "Jazz",
-    "Blues",
-    "Classical",
-    "Country",
-    "Folk",
-    "Metal",
-    "Punk",
-    "Indie",
-    "Alternative",
-    "Reggae",
-    "Soul",
-    "Funk",
-    "Disco",
-    "Ambient",
-    "World",
-  ];
-
-  function handleSubmit() {
+  async function handleSubmit() {
     isLoading = true;
 
     // Simulate API delay
-    setTimeout(() => {
-      onSave(editedFile);
-      isLoading = false;
-    }, 500);
+    onSave(editedFile, {
+      update: updateCover,
+      bytes: imageBytes,
+    });
+    isLoading = false;
   }
 
   function handleKeydown(e: KeyboardEvent) {
@@ -54,6 +33,27 @@
   function handleBackdropClick(e: MouseEvent) {
     if (e.target === e.currentTarget) {
       onClose();
+    }
+  }
+
+  let currentImageSrc: string = `http://localhost:8080/cover/get/${file.uid}`;
+  let currentImageAlt: string = file.name;
+  let imageBytes: Uint8Array = new Uint8Array();
+  let updateCover: boolean = false;
+  let imagePreviewUrl: string | null = null;
+
+  async function handleFileSelect(event: { currentTarget: HTMLInputElement }) {
+    const input = event.currentTarget;
+    const selectedFile = input.files?.[0];
+
+    if (selectedFile) {
+      imageBytes = await selectedFile.bytes();
+
+      // Create a URL for the selected image and update the display immediately
+      const objectUrl = URL.createObjectURL(selectedFile);
+      currentImageSrc = objectUrl;
+      imagePreviewUrl = currentImageSrc;
+      currentImageAlt = selectedFile.name;
     }
   }
 
@@ -86,29 +86,12 @@
         {file.name}
       </h2>
       <button
-        class="rounded-full p-1 text-gray-400 hover:bg-gray-700 hover:text-white"
+        class="rounded-full p-2 pb-0.5 text-gray-400 hover:bg-gray-700 hover:text-white"
         on:click={onClose}
       >
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
-
-    <!-- <div class="border-b border-gray-700"> -->
-    <!--   <nav class="flex px-6"> -->
-    <!--     <button -->
-    <!--       class={`px-4 py-3 text-sm font-medium border-b-2 ${activeTab === "basic" ? "border-cyan-500 text-cyan-500" : "border-transparent text-gray-400 hover:text-gray-300"}`} -->
-    <!--       on:click={() => (activeTab = "basic")} -->
-    <!--     > -->
-    <!--       Basic Info -->
-    <!--     </button> -->
-    <!--     <button -->
-    <!--       class={`px-4 py-3 text-sm font-medium border-b-2 ${activeTab === "advanced" ? "border-cyan-500 text-cyan-500" : "border-transparent text-gray-400 hover:text-gray-300"}`} -->
-    <!--       on:click={() => (activeTab = "advanced")} -->
-    <!--     > -->
-    <!--       Advanced -->
-    <!--     </button> -->
-    <!--   </nav> -->
-    <!-- </div> -->
 
     <form on:submit|preventDefault={handleSubmit}>
       <div class="px-6 py-4">
@@ -117,19 +100,36 @@
             class="group relative mb-4 flex h-50 w-50 items-center justify-center rounded bg-gray-900 text-cyan-500"
           >
             <img
-              src="http://localhost:8080/cover/{file.uid}"
+              src={currentImageSrc}
               class="overflow-hidden rounded hover:fill-gray-50"
-              alt={file.name}
+              alt={currentImageAlt}
             />
             <div
               class="absolute inset-0 group-hover:bg-black/70 transition-all duration-300 overflow-hidden rounded"
             >
               <span
                 class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                on:click={() => {
+                  document.getElementById("fileInput")?.click();
+                }}
+                role="button"
+                tabindex="0"
+                on:keypress={() => {}}
               >
-                <span class="material-symbols-outlined text-white">edit</span>
+                <span
+                  class="select-none icon material-symbols-outlined text-white"
+                  style="font-size: 3rem;">edit</span
+                >
               </span>
             </div>
+            <!-- Hidden file input -->
+            <input
+              id="fileInput"
+              type="file"
+              accept="image/*"
+              style="display: none;"
+              on:change={handleFileSelect}
+            />
           </div>
           <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
@@ -186,16 +186,13 @@
               <label for="genre" class="block text-sm font-medium text-gray-300"
                 >Genre</label
               >
-              <select
+
+              <input
+                type="text"
                 id="genre"
                 bind:value={editedFile.metadata.genre}
                 class="mt-1 block w-full rounded-md border-gray-700 bg-gray-700 px-3 py-2 text-white shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
-              >
-                <option value="">Select genre</option>
-                {#each genres as genre}
-                  <option value={genre}>{genre}</option>
-                {/each}
-              </select>
+              />
             </div>
           </div>
         </div>
