@@ -2,7 +2,6 @@
   import { onMount, createEventDispatcher } from "svelte";
   import type { CoverUpdate, MusicFile } from "../types";
   import { formatDuration } from "../utils/formatters";
-  import type { HTMLInputEvent } from "../types";
   import type { ChangeEventHandler } from "svelte/elements";
 
   export let file: MusicFile;
@@ -12,13 +11,14 @@
   let editedFile: MusicFile = { ...file };
   let isLoading = false;
 
-  async function handleSubmit() {
+  function handleSubmit() {
     isLoading = true;
 
     // Simulate API delay
     onSave(editedFile, {
       update: updateCover,
       bytes: imageBytes,
+      mimeType: imageType,
     });
     isLoading = false;
   }
@@ -36,11 +36,12 @@
     }
   }
 
-  let currentImageSrc: string = `http://localhost:8080/cover/get/${file.uid}`;
+  let currentImageSrc: string = `/api/cover/get/${file.uid}`;
   let currentImageAlt: string = file.name;
   let imageBytes: Uint8Array = new Uint8Array();
   let updateCover: boolean = false;
   let imagePreviewUrl: string | null = null;
+  let imageType: string = "";
 
   async function handleFileSelect(event: { currentTarget: HTMLInputElement }) {
     const input = event.currentTarget;
@@ -54,6 +55,8 @@
       currentImageSrc = objectUrl;
       imagePreviewUrl = currentImageSrc;
       currentImageAlt = selectedFile.name;
+      imageType = selectedFile.type;
+      updateCover = true;
     }
   }
 
@@ -174,7 +177,7 @@
                 >Year</label
               >
               <input
-                type="text"
+                type="number"
                 id="year"
                 bind:value={editedFile.metadata.year}
                 placeholder="YYYY"
