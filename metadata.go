@@ -4,13 +4,35 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 )
 
-func editMetadata(filePath string, coverPath string, m Meta) error {
-
+func setCover(filePath string, coverPath string) error {
 	cover := fmt.Sprintf("cover=%s", coverPath)
+
+	cmd := exec.Command("tageditor",
+		"-s",
+		cover,
+		"--max-padding", "100000",
+		"-f", filePath,
+	)
+
+	out, err := cmd.CombinedOutput()
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	infoLog(string(out))
+
+	return nil
+}
+
+func editMetadata(filePath string, m Meta) error {
+
 	title := fmt.Sprintf("title=%s", m.Title)
 	artist := fmt.Sprintf("artist=%s", m.Artist)
 	album := fmt.Sprintf("album=%s", m.Album)
@@ -19,7 +41,6 @@ func editMetadata(filePath string, coverPath string, m Meta) error {
 
 	cmd := exec.Command("tageditor",
 		"-s",
-		cover,
 		title,
 		artist,
 		album,
@@ -78,52 +99,45 @@ func gatherMetadata(filePath string) (Meta, error) {
 	metadata := Meta{}
 
 	cmd := exec.Command(
-		"tageditor",
-		"-g", "-n",
-		"title", "artist",
-		"album", "genre",
-		"year", "-f",
+		"ffprobe",
 		filePath,
 	)
 
-	out, err := cmd.Output()
+	out, err := cmd.CombinedOutput()
 
 	if err != nil {
 		return Meta{}, err
 	}
 
-	output := string(out)
+	input := string(out)
 
-	lines := strings.Split(output, "\n")
+	var dateRegex *regexp.Regexp
 
-	lines = lines[2 : len(lines)-1]
-
-	for i, line := range lines {
-		line := strings.TrimSpace(line)
-		vals := strings.Fields(line)
-
-		// fmt.Println(vals)
-
-		val := strings.Join(vals[1:], " ")
-
-		switch i {
-		case DATE:
-			val = strings.Join(vals[2:], " ")
-			metadata.Year, _ = strconv.Atoi(val)
-		case GENRE:
-			metadata.Genre = val
-		case ALBUM:
-			metadata.Album = val
-		case ARTIST:
-			metadata.Artist = val
-		case TITLE:
-			metadata.Title = val
-		}
-
-		if i == TITLE {
-			break
-		}
+	// Regular expressions for each field
+	titleRegex := regexp.MustCompile(`(?i)title\s*:\s*(.+)`)
+	albumRegex := regexp.MustCompile(`(?i)album\s*:\s*(.+)`)
+	artistRegex := regexp.MustCompile(`(?i)artist\s*:\s*(.+)`)
+	if strings.HasSuffix(filePath, "flac") {
+		dateRegex = regexp.MustCompile(`(?i)date\s*:\s*(.+)`)
+	} else {
+		dateRegex = regexp.MustCompile(`(?i)year\s*:\s*(.+)`)
 	}
+	genreRegex := regexp.MustCompile(`(?i)genre\s*:\s*(.+)`)
+
+	// Extract fields
+	metadata.Title = extractField(titleRegex, input)
+	metadata.Album = extractField(albumRegex, input)
+	metadata.Artist = extractField(artistRegex, input)
+	metadata.Year, _ = strconv.Atoi(extractField(dateRegex, input))
+	metadata.Genre = extractField(genreRegex, input)
 
 	return metadata, nil
+}
+
+func extractField(regex *regexp.Regexp, input string) string {
+	match := regex.FindStringSubmatch(input)
+	if len(match) > 1 {
+		return match[1] // Return the captured group
+	}
+	return "" // Return empty string if no match
 }
