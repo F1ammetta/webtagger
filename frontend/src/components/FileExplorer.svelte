@@ -26,29 +26,42 @@
       )
     : files;
 
+  const options = ["Title", "Artist", "Album", "Size"];
+
+  var sort = "Title";
+  var inverted = false;
+
   const unsubscribe = fileStore.subscribe((state) => {
     files = state.files;
     isLoading = state.loading;
     viewMode = state.layout;
   });
 
-  function getFileIcon(file: MusicFile) {
-    const extension = file.name.split(".").pop()?.toLowerCase();
-
-    switch (extension) {
-      case "mp3":
-        return "music_note";
-      case "flac":
-        return "high_quality";
-      case "wav":
-        return "equalizer";
-      case "m4a":
-      case "aac":
-        return "audio_file";
-      default:
-        return "audio_file";
-    }
+  function handleSort(option: string) {
+    filteredFiles = filteredFiles.sort((a, b) => {
+      var val = 0;
+      switch (option) {
+        case options[0]:
+          val = a.metadata.title.localeCompare(b.metadata.title);
+          break;
+        case options[1]:
+          val = a.metadata.artist.localeCompare(b.metadata.artist);
+          break;
+        case options[2]:
+          val = a.metadata.album.localeCompare(b.metadata.album);
+          break;
+        case options[3]:
+          val = a.size - b.size;
+          break;
+      }
+      val = sort == option && !inverted ? -val : val;
+      return val;
+    });
+    sort = option;
+    inverted = !inverted;
   }
+
+  var showSortDropdown = false;
 
   onMount(() => {
     return unsubscribe;
@@ -58,18 +71,51 @@
 <div class="h-full">
   <!-- Toolbar -->
   <div class="mb-4 flex flex-wrap items-center justify-between gap-4">
-    <div class="relative">
-      <div
-        class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
-      >
-        <span class="material-symbols-outlined text-gray-400">search</span>
+    <div class="flex items-center gap-4">
+      <div class="relative">
+        <div
+          class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
+        >
+          <span class="material-symbols-outlined text-gray-400">search</span>
+        </div>
+        <input
+          type="text"
+          bind:value={searchQuery}
+          placeholder="Search files..."
+          class="block w-full rounded-lg border border-gray-700 bg-gray-800 p-2.5 pl-10 text-sm text-white placeholder-gray-400 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+        />
       </div>
-      <input
-        type="text"
-        bind:value={searchQuery}
-        placeholder="Search files..."
-        class="block w-full rounded-lg border border-gray-700 bg-gray-800 p-2.5 pl-10 text-sm text-white placeholder-gray-400 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
-      />
+
+      <div class="relative">
+        <button
+          class="rounded-md p-2 pb-0.5 hover:bg-gray-700 hover:text-cyan-400 text-gray-400"
+          on:click={() => (showSortDropdown = !showSortDropdown)}
+          title="Sort"
+        >
+          <span class="material-symbols-outlined">sort</span>
+        </button>
+
+        <!-- Dropdown menu -->
+        {#if showSortDropdown}
+          <div
+            class="absolute right-0 mt-2 w-48 rounded-lg border border-gray-700 bg-gray-800 shadow-lg"
+          >
+            <div class="py-1">
+              {#each options as option}
+                <div
+                  class="cursor-pointer px-4 py-2 text-sm text-gray-400 hover:bg-gray-700"
+                  on:click={() => handleSort(option)}
+                  on:keypress={() => {}}
+                  role="button"
+                  tabindex="0"
+                >
+                  Sort by {option}
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
+      </div>
     </div>
 
     <div class="flex items-center gap-2">
@@ -120,8 +166,8 @@
               class="mb-2 flex h-50 w-50 items-center justify-center rounded bg-gray-900 text-cyan-500"
             >
               <img
-                src="http://localhost:8080/cover/get/{file.uid}"
-                class="overflow-hidden rounded"
+                src="/api/cover/get/{file.uid}"
+                class="overflow-hidden select-none rounded"
                 loading="lazy"
                 alt={file.name}
               />
@@ -186,8 +232,8 @@
                 <td class="whitespace-nowarp px-4.5 py-2">
                   <div class="flex items-center">
                     <img
-                      src="http://localhost:8080/cover/get/{file.uid}"
-                      class="overflow-hidden rounded h-15 mr-3"
+                      src="/api/cover/get/{file.uid}"
+                      class="overflow-hidden select-none rounded h-15 mr-3"
                       loading="lazy"
                       alt={file.metadata.title}
                     />
