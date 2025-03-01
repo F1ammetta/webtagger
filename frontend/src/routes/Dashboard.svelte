@@ -38,8 +38,8 @@
     <FileTagEditor
       file={selectedFile}
       onClose={closeTagEditor}
-      onSave={(updatedFile, cover) => {
-        fileStore.updateFile(updatedFile, cover);
+      onSave={async (updatedFile, cover) => {
+        await fileStore.updateFile(updatedFile, cover);
         closeTagEditor();
       }}
     />
