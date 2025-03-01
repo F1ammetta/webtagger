@@ -51,9 +51,8 @@ func main() {
 	http.HandleFunc("/songs", songsHandler)
 	http.HandleFunc("/scan", scanHandler)
 	http.HandleFunc("/cover/get/{uid}", coverHandler)
-
-	// http.HandleFunc("/edit/{uid}")
-	// http.HandleFunc("/cover/set/{uid}")
+	http.HandleFunc("/cover/set/{uid}", setCoverHandler)
+	http.HandleFunc("/edit/{uid}", editHandler)
 
 	fmt.Println("listening on http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
