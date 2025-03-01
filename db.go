@@ -198,7 +198,21 @@ func handleEvent(db *clover.DB, event DbEvent) {
 		}
 		return
 	case Edit:
+		file := event.data.(File)
+		uid := file.Uid
 
+		if err := editSong(db, uid, file); err != nil {
+			result <- DbResult{
+				data: nil,
+				err:  err,
+			}
+		} else {
+			result <- DbResult{
+				data: nil,
+				err:  nil,
+			}
+		}
+		return
 	case Delete:
 
 	case Scan:
@@ -226,6 +240,30 @@ func eventLoop(ctx context.Context) {
 		}
 	}
 
+}
+
+func editSong(db *clover.DB, uid string, file File) error {
+	query := db.Query("songs")
+
+	doc, err := query.Where(clover.Field("Uid").Eq(uid)).FindFirst()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if doc == nil {
+		return errors.New("Couldn't find song")
+	}
+
+	meta := file.Metadata
+
+	doc.Set("Metadata.Title", meta.Title)
+	doc.Set("Metadata.Artist", meta.Artist)
+	doc.Set("Metadata.Album", meta.Album)
+	doc.Set("Metadata.Year", meta.Year)
+	doc.Set("Metadata.Genre", meta.Genre)
+
+	return db.Save("songs", doc)
 }
 
 func findSong(db *clover.DB, uid string) (File, error) {
