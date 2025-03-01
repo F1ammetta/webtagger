@@ -1,11 +1,23 @@
 import { writable } from "svelte/store";
-import type { MusicFile, CoverUpdate } from "../types";
+import type { MusicFile, CoverUpdate, CoverReq } from "../types";
 
 interface FileState {
   files: MusicFile[];
   loading: boolean;
   error: string | null;
   layout: "grid" | "list";
+}
+function uint8ArrayToBase64(array: Uint8Array): string {
+  // For large arrays, we need to chunk to avoid "Maximum call stack size exceeded"
+  const chunk = 8192;
+  let binary = '';
+
+  for (let i = 0; i < array.length; i += chunk) {
+    const slice = array.subarray(i, Math.min(i + chunk, array.length));
+    binary += String.fromCharCode.apply(null, Array.from(slice));
+  }
+
+  return btoa(binary);
 }
 
 function createFileStore() {
@@ -45,7 +57,7 @@ function createFileStore() {
         // Mock data response
         let files: MusicFile[] = [];
 
-        const res = await fetch("http://localhost:8080/songs");
+        const res = await fetch("/api/songs");
 
         files = await res.json();
 
@@ -64,28 +76,55 @@ function createFileStore() {
       }
     },
     updateFile: async (updatedFile: MusicFile, cover: CoverUpdate) => {
+      var updatedFiles: MusicFile[] = []
+
+      const res = await fetch(`/api/edit/${updatedFile.uid}`, {
+        method: "POST",
+        body: JSON.stringify(updatedFile),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8"
+        },
+      });
+
+      console.log(res);
+
+      if (res.ok) {
+        console.log("sucess");
+      } else {
+        updatedFile.uid = "";
+      }
+
+
       update((state) => {
         // In production, this would be a real API call
         // For now, update the local state
-        //
-        var updatedFiles: MusicFile[] = []
-
-        fetch(`http://localhost:8080/edit/${updatedFile.uid}`, {
-          method: "POST",
-          body: JSON.stringify(updatedFile),
-          headers: {
-            "Content-type": "application/json; charset=UTF-8"
-          },
-        }).then((res) => {
-          if (res.ok) {
-            updatedFiles = state.files.map((file) =>
-              file.uid === updatedFile.uid ? updatedFile : file
-            );
-          }
-        })
+        updatedFiles = state.files.map((file) =>
+          file.uid == updatedFile.uid ? updatedFile : file
+        );
 
         return { ...state, files: updatedFiles };
       });
+
+
+      let data: CoverReq = {
+        data: uint8ArrayToBase64(cover.bytes),
+        type: cover.mimeType,
+      };
+
+      if (cover.update) {
+        const res = await fetch(`/api/cover/set/${updatedFile.uid}`, {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8"
+          }
+        });
+
+        if (res.ok) {
+          // TODO: Update File img in the UI
+        }
+
+      }
 
       // Simulate API call to update the file
       // In production: await fetch(`/file/${updatedFile.id}`, { method: 'POST', body: JSON.stringify(updatedFile) });
