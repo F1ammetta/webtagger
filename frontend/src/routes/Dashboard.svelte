@@ -9,14 +9,19 @@
   let selectedFile: MusicFile | null = null;
   let isTagEditorOpen = false;
 
-  function handleFileSelect(file: MusicFile) {
+  let fileExplorer: FileExplorer;
+  let idx: number;
+
+  function handleFileSelect(file: MusicFile, index: number) {
     selectedFile = file;
     isTagEditorOpen = true;
+    idx = index;
   }
 
   function closeTagEditor() {
     isTagEditorOpen = false;
     selectedFile = null;
+    fileExplorer.reloadImage(idx);
   }
 
   onMount(() => {
@@ -30,7 +35,7 @@
 
   <main class="flex-1 overflow-y-auto">
     <div class="container mx-auto max-w-7xl px-4 py-6 pb-40">
-      <FileExplorer onFileSelect={handleFileSelect} />
+      <FileExplorer bind:this={fileExplorer} onFileSelect={handleFileSelect} />
     </div>
   </main>
 
