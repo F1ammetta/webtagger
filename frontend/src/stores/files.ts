@@ -61,10 +61,6 @@ function createFileStore() {
 
         files = await res.json();
 
-        console.log(files);
-
-
-
         update((state) => ({ ...state, files: files, loading: false, }));
       } catch (error) {
         console.error("Failed to load files:", error);
