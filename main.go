@@ -21,18 +21,19 @@ const (
 )
 
 type Meta struct {
-	Title  string `json:"title"`
-	Artist string `json:"artist"`
-	Album  string `json:"album"`
-	Genre  string `json:"genre"`
-	Year   int    `json:"year"`
+	Title  string `json:"title" clover:"Title"`
+	Artist string `json:"artist" clover:"Artist"`
+	Album  string `json:"album" clover:"Album"`
+	Genre  string `json:"genre" clover:"Genre"`
+	Year   int    `json:"year" clover:"Year"`
 }
 
 type File struct {
-	Uid      string  `json:"uid"`
-	Name     string  `json:"name"`
-	Size     float32 `json:"size"`
-	Metadata Meta    `json:"metadata"`
+	Uid      string  `json:"uid" clover:"Uid"`
+	Name     string  `json:"name" clover:"Name"`
+	Size     float32 `json:"size" clover:"Size"`
+	Metadata Meta    `json:"metadata" clover:"Metadata"`
+	Deleted  bool    `json:"-" clover:"Deleted"`
 }
 
 var filenames []string
