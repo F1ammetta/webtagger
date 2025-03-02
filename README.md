@@ -18,7 +18,7 @@
 - [Tageditor](https://github.com/Martchus/tageditor)
 - [FFmpeg](https://github.com/FFmpeg/FFmpeg)
 
-All included in the Nix flake used for developmenta.
+All included in the Nix flake used for development.
 
 ### Running the Backend
 
