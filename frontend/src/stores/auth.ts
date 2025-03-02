@@ -30,10 +30,10 @@ function createAuthStore() {
         if (username === 'admin' && password === 'password') {
           const mockUser = { id: '1', username, email: 'admin@example.com' };
           const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIn0.mock-token';
-          
+
           localStorage.setItem('musicAppToken', mockToken);
           localStorage.setItem('musicAppUser', JSON.stringify(mockUser));
-          
+
           set({ user: mockUser, token: mockToken, isAuthenticated: true });
           return { success: true };
         }
@@ -49,10 +49,9 @@ function createAuthStore() {
       set(initialState);
     },
     checkAuth: async () => {
-      console.log('sexo tilin');
       const token = localStorage.getItem('musicAppToken');
       const userStr = localStorage.getItem('musicAppUser');
-      
+
       if (token && userStr) {
         try {
           const user = JSON.parse(userStr);
