@@ -1,8 +1,6 @@
 <script lang="ts">
-  import { onMount, createEventDispatcher } from "svelte";
+  import { onMount } from "svelte";
   import type { CoverUpdate, MusicFile } from "../types";
-  import { formatDuration } from "../utils/formatters";
-  import type { ChangeEventHandler } from "svelte/elements";
 
   export let file: MusicFile;
   export let onClose: () => void;
@@ -36,7 +34,7 @@
     }
   }
 
-  let currentImageSrc: string = `/api/cover/get/${file.uid}`;
+  let currentImageSrc: string = `/api/cover/get/${file.uid}?${Date.now()}`;
   let currentImageAlt: string = file.name;
   let imageBytes: Uint8Array = new Uint8Array();
   let updateCover: boolean = false;
