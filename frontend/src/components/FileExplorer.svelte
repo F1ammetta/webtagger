@@ -3,27 +3,27 @@
   import { fileStore } from "../stores/files";
   import type { MusicFile } from "../types";
   import { formatFileSize } from "../utils/formatters";
-  import { Layout } from "lucide-svelte";
+  import LazyImage from "./LazyImage.svelte";
+  import Fuse from "fuse.js";
 
-  export let onFileSelect: (file: MusicFile) => void;
+  export let onFileSelect: (file: MusicFile, index: number) => void;
 
   let files: MusicFile[] = [];
   let isLoading = true;
   let searchQuery = "";
   let viewMode: "grid" | "list";
 
+  let fuse: Fuse<MusicFile>;
+  $: {
+    fuse = new Fuse(files, {
+      keys: ["name", "metadata.artist", "metadata.album", "metadata.title"],
+      includeScore: true,
+      threshold: 0.3,
+    });
+  }
+
   $: filteredFiles = searchQuery
-    ? files.filter(
-        (file) =>
-          file.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          file.metadata.artist
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          file.metadata.album
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          file.metadata.title.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
+    ? fuse.search(searchQuery).map((result) => result.item) // Extract matched items
     : files;
 
   const options = ["Title", "Artist", "Album", "Size"];
@@ -31,8 +31,18 @@
   var sort = "Title";
   var inverted = false;
 
+  let imageRefs: LazyImage[] = [];
+
+  export function reloadImage(index: number) {
+    if (imageRefs[index]) {
+      imageRefs[index].reloadImage();
+    }
+  }
+
   const unsubscribe = fileStore.subscribe((state) => {
-    files = state.files;
+    files = state.files.sort((a, b) =>
+      a.metadata.title.localeCompare(b.metadata.title),
+    );
     isLoading = state.loading;
     viewMode = state.layout;
   });
@@ -98,7 +108,7 @@
         <!-- Dropdown menu -->
         {#if showSortDropdown}
           <div
-            class="absolute right-0 mt-2 w-48 rounded-lg border border-gray-700 bg-gray-800 shadow-lg"
+            class="absolute z-10 right-0 mt-2 w-48 rounded-lg border border-gray-700 bg-gray-800 shadow-lg"
           >
             <div class="py-1">
               {#each options as option}
@@ -154,22 +164,22 @@
       <div
         class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
       >
-        {#each filteredFiles as file (file.uid)}
+        {#each filteredFiles as file, index}
           <div
             class="group cursor-pointer rounded-lg bg-gray-800 p-4 transition-all hover:bg-gray-700 w-58"
-            on:click={() => onFileSelect(file)}
-            on:keydown={(e) => e.key === "Enter" && onFileSelect(file)}
+            on:click={() => onFileSelect(file, index)}
+            on:keydown={(e) => e.key === "Enter" && onFileSelect(file, index)}
             role="button"
             tabindex="0"
           >
             <div
               class="mb-2 flex h-50 w-50 items-center justify-center rounded bg-gray-900 text-cyan-500"
             >
-              <img
-                src="/api/cover/get/{file.uid}"
-                class="overflow-hidden select-none rounded"
-                loading="lazy"
-                alt={file.name}
+              <LazyImage
+                bind:this={imageRefs[index]}
+                src={`/api/cover/get/${file.uid}`}
+                alt={file.metadata.title}
+                className="overflow-hidden select-none rounded"
               />
             </div>
             <div
@@ -222,20 +232,21 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-700 bg-gray-800">
-            {#each filteredFiles as file (file.uid)}
+            {#each filteredFiles as file, index}
               <tr
-                class="cursor-pointer transition-colors hover:bg-gray-700"
-                on:click={() => onFileSelect(file)}
-                on:keydown={(e) => e.key === "Enter" && onFileSelect(file)}
+                class="cursor-pointer h-25 transition-colors hover:bg-gray-700"
+                on:click={() => onFileSelect(file, index)}
+                on:keydown={(e) =>
+                  e.key === "Enter" && onFileSelect(file, index)}
                 tabindex="0"
               >
                 <td class="whitespace-nowarp px-4.5 py-2">
                   <div class="flex items-center">
-                    <img
-                      src="/api/cover/get/{file.uid}"
-                      class="overflow-hidden select-none rounded h-15 mr-3"
-                      loading="lazy"
+                    <LazyImage
+                      bind:this={imageRefs[index]}
+                      src={`/api/cover/get/${file.uid}`}
                       alt={file.metadata.title}
+                      className="overflow-hidden w-15 select-none rounded mr-4 mt-2 mb-2"
                     />
                     <span class="font-medium w-64 truncate">
                       {file.metadata.title}</span
