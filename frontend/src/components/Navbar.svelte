@@ -14,7 +14,9 @@
   }
 </script>
 
-<nav class="bg-gray-800 shadow-md">
+<nav
+  class="bg-gray-800 border border-t border-r border-l border-b-gray-700 shadow-md"
+>
   <div class="container mx-auto px-4">
     <div class="flex h-16 items-center justify-between">
       <div class="flex items-center">
