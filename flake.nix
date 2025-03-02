@@ -15,12 +15,14 @@
         go
         nodejs_18
         tageditor
+        ffmpeg
       ];
 
       deps = with pkgs; [
         go
         nodejs_18
         tageditor
+        ffmpeg
       ];
 
     in
