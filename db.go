@@ -43,12 +43,13 @@ func getSongs(db *clover.DB) []File {
 func songUnmarshal(doc *clover.Document) File {
 	var song File
 
-	var metadata map[string]interface{}
-	metadata = doc.Get("Metadata").(map[string]interface{})
+	var metadata map[string]any
+	metadata = doc.Get("Metadata").(map[string]any)
 
 	song.Uid = doc.Get("Uid").(string)
 	song.Name = doc.Get("Name").(string)
 	song.Size = float32(doc.Get("Size").(float64))
+	song.Deleted = doc.Get("Deleted").(bool)
 
 	song.Metadata.Album = metadata["Album"].(string)
 	song.Metadata.Title = metadata["Title"].(string)
@@ -72,6 +73,8 @@ func songInDb(db *clover.DB, uid string) bool {
 	}
 
 	if doc.Get("Uid").(string) == uid {
+		doc.Set("Deleted", false)
+		db.Save("songs", doc)
 		return true
 	}
 
@@ -87,21 +90,22 @@ const (
 	Delete
 	All
 	Scan
+	Clean
 )
 
 func (e EventType) String() string {
-	return [...]string{"Insert", "Query", "Edit", "Delete", "All", "Scan"}[e]
+	return [...]string{"Insert", "Query", "Edit", "Delete", "All", "Scan", "Clean"}[e]
 }
 
 type DbEvent struct {
 	eventType  EventType
-	data       interface{}
+	data       any
 	resultChan chan (DbResult)
 	// File for insertions, Edits, and Deletes, string for querys
 }
 
 type DbResult struct {
-	data interface{}
+	data any
 	err  error
 }
 
@@ -131,20 +135,7 @@ func setStatus(eventType EventType) {
 }
 
 func dispatch(event DbEvent) {
-	// switch dbStatus {
-	// case IO, IDLE:
 	eventChan <- event
-	// case SCANNING:
-	// 	result := event.resultChan
-	// 	defer close(result)
-	// 	infoLog("Rejected event", event.eventType.String())
-	// 	result <- DbResult{
-	// 		data: nil,
-	// 		err:  errors.New("Scanning File System, database not accesible"),
-	// 	}
-	// default:
-	// 	eventChan <- event
-	// }
 }
 
 func handleEvent(db *clover.DB, event DbEvent) {
@@ -216,7 +207,52 @@ func handleEvent(db *clover.DB, event DbEvent) {
 	case Delete:
 
 	case Scan:
-		go scanner()
+		flagFiles(db)
+		cleanChan := make(chan struct{})
+		go scanner(cleanChan)
+		go clean(cleanChan)
+	case Clean:
+		cleaner(db)
+	}
+}
+
+func cleaner(db *clover.DB) {
+	query := db.Query("songs")
+
+	err := query.Where(clover.Field("Deleted").Eq(true)).Delete()
+
+	if err != nil {
+		errLog(err)
+	}
+
+	infoLog("Cleaned db successfully")
+}
+
+func clean(cleanChan chan struct{}) {
+	<-cleanChan
+
+	resChan := make(chan DbResult)
+
+	ev := DbEvent{
+		data:       nil,
+		eventType:  Clean,
+		resultChan: resChan,
+	}
+
+	dispatch(ev)
+	<-resChan
+}
+
+func flagFiles(db *clover.DB) {
+	query := db.Query("songs")
+
+	if res, err := query.FindAll(); err != nil {
+		fmt.Println(err)
+	} else {
+		for _, doc := range res {
+			doc.Set("Deleted", true)
+			db.Save("songs", doc)
+		}
 	}
 }
 
@@ -279,7 +315,12 @@ func findSong(db *clover.DB, uid string) (File, error) {
 		return File{}, errors.New("Couldn't find song")
 	}
 
-	song := songUnmarshal(doc)
+	var song File
+	song = songUnmarshal(doc)
+
+	if err != nil {
+		return File{}, errors.New("Couldn't find song")
+	}
 
 	if song.Uid == "" {
 		return File{}, errors.New("Couldn't find song")
