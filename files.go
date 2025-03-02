@@ -53,7 +53,7 @@ func walkHandler(path string, d fs.DirEntry, err error) error {
 	metadata, err := gatherMetadata(path)
 
 	file := File{
-		Name: name, Size: size, Uid: uid, Metadata: metadata,
+		Name: name, Size: size, Uid: uid, Metadata: metadata, Deleted: false,
 	}
 
 	noChan := make(chan DbResult, 1)
@@ -69,11 +69,12 @@ func walkHandler(path string, d fs.DirEntry, err error) error {
 	return nil
 }
 
-func scanner() {
+func scanner(cleanChan chan (struct{})) {
 	err := filepath.WalkDir(musicDir, walkHandler)
 
 	if err != nil {
 		fmt.Printf("err: %s", err)
 	}
 
+	cleanChan <- struct{}{}
 }
