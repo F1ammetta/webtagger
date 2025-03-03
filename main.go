@@ -56,6 +56,7 @@ func main() {
 	http.HandleFunc("/cover/get/{uid}", coverHandler)
 	http.HandleFunc("/cover/set/{uid}", setCoverHandler)
 	http.HandleFunc("/edit/{uid}", editHandler)
+	http.HandleFunc("/upload", uploadHandler)
 
 	fmt.Println("listening on http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
