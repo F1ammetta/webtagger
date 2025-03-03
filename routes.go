@@ -55,10 +55,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	// Get the filename - either from the form field or from the file header
-	fileName := r.FormValue("name")
-	if fileName == "" {
-		fileName = header.Filename
-	}
+	fileName := header.Filename
 
 	// Make sure the directory exists
 	if err := os.MkdirAll(filepath.Dir(musicDir+fileName), 0755); err != nil {
@@ -84,11 +81,37 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Log success
 	infoLog(fmt.Sprintf("File uploaded successfully: %s", fileName))
 
+	hash := sha256.New()
+	hash.Write([]byte(fileName))
+	hashed := hash.Sum(nil)
+
+	uid := hex.EncodeToString(hashed)
+
+	resChan := make(chan DbResult)
+
+	event := DbEvent{
+		eventType:  Query,
+		data:       uid,
+		resultChan: resChan,
+	}
+
+	<-time.After(time.Millisecond * 500)
+	dispatch(event)
+
+	result := <-resChan
+
+	newFile := result.data.(File)
+
+	jsonFile, err := json.Marshal(newFile)
+
+	if err != nil {
+		errLog(err)
+	}
+
 	// Return success response
-	w.Write([]byte(`{"success":true,"message":"File uploaded successfully"}`))
+	w.Write(jsonFile)
 }
 
 func editHandler(w http.ResponseWriter, r *http.Request) {
