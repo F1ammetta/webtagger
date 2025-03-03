@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 SESSION_NAME="webtagger"
 WORKING_DIR="./"
