@@ -20,6 +20,22 @@ function uint8ArrayToBase64(array: Uint8Array): string {
   return btoa(binary);
 }
 
+async function uploadFile(file: File, endpoint: string): Promise<Response> {
+  const formData = new FormData();
+  formData.append('data', file);
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to upload ${file.name}: ${response.statusText}`);
+  }
+
+  return response;
+}
+
 function createFileStore() {
   const initialState: FileState = {
     files: [],
@@ -71,46 +87,29 @@ function createFileStore() {
         }));
       }
     },
-    upload: async (list: FileList) => {
-      let files = Array.from(list);
+    upload: async (files: FileList) => {
+      const uploadPromises = Array.from(files).map(file => uploadFile(file, '/api/upload'));
+
+      let newFiles: MusicFile[] = [];
+
       try {
-        const uploadPromises = files.map(async (file) => {
-          // Create a new FormData instance for each file
-          const formData = new FormData();
-
-          // Add the file directly - no need for manual base64 conversion
-          formData.append('data', file);
-
-          // Add additional metadata if needed
-          formData.append('name', file.name);
-
-
-          // Send the request
-          const response = await fetch('http://localhost:8080/upload/', {
-            method: 'POST',
-            body: formData,
-            // No need to set Content-Type header - browser sets it automatically with boundary
-          });
-
-          if (!response.ok) {
-            throw new Error(`Upload failed with status: ${response.status}`);
-          }
-
-          return {
-            fileName: file.name,
-            status: response.status,
-            data: await response.json() // Assuming server returns JSON
-          };
-        });
-
-        // Wait for all uploads to complete
-        const results = await Promise.all(uploadPromises);
-        console.log('All uploads completed successfully:', results);
-        return results;
+        const responses = await Promise.all(uploadPromises);
+        console.log('All files uploaded successfully:', responses);
+        for (var res of responses) {
+          let file: MusicFile = await res.json();
+          newFiles.push(file);
+        }
       } catch (error) {
-        console.error('Upload process failed:', error);
-        throw error; // Re-throw to allow caller to handle
+        console.error('Error uploading files:', error);
       }
+
+
+      update((state) => {
+        // In production, this would be a real API call
+        // For now, update the local state
+
+        return { ...state, loading: false, files: [...state.files, ...newFiles] };
+      });
     },
     updateFile: async (updatedFile: MusicFile, cover: CoverUpdate) => {
       var updatedFiles: MusicFile[] = []
