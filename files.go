@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -102,36 +103,45 @@ func watchLoop(w *fsnotify.Watcher) {
 				go dispatch(event)
 			case fsnotify.Remove:
 				// TODO: Handle File Removal
-				dirs := strings.Split(e.Name, "/")
-				name := dirs[len(dirs)-1]
-				hash := sha256.New()
-				hash.Write([]byte(name))
-				hashed := hash.Sum(nil)
-
-				uid := hex.EncodeToString(hashed)
-
-				ext := strings.Split(e.Name, ".")
-				if !slices.Contains(exts, ext[len(ext)-1]) {
-					continue
-				}
-
-				noChan := make(chan DbResult, 1)
-
-				event := DbEvent{
-					eventType:  Delete,
-					data:       uid,
-					resultChan: noChan,
-				}
-
-				go dispatch(event)
+				removeFile(e)
 			case fsnotify.Rename:
 				// TODO: Handle File Renaming, or don't
+				if _, err := os.Open(e.Name); err != nil {
+					if errors.Is(err, os.ErrNotExist) {
+						removeFile(e)
+					}
+				}
 
 			}
 
 			infoLog(fmt.Sprintf("%s", e))
 		}
 	}
+}
+
+func removeFile(e fsnotify.Event) {
+	dirs := strings.Split(e.Name, "/")
+	name := dirs[len(dirs)-1]
+	hash := sha256.New()
+	hash.Write([]byte(name))
+	hashed := hash.Sum(nil)
+
+	uid := hex.EncodeToString(hashed)
+
+	ext := strings.Split(e.Name, ".")
+	if !slices.Contains(exts, ext[len(ext)-1]) {
+		return
+	}
+
+	noChan := make(chan DbResult, 1)
+
+	event := DbEvent{
+		eventType:  Delete,
+		data:       uid,
+		resultChan: noChan,
+	}
+
+	go dispatch(event)
 }
 
 func walkHandler(path string, d fs.DirEntry, err error) error {
