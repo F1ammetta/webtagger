@@ -47,6 +47,14 @@
     viewMode = state.layout;
   });
 
+  async function handleFileUpload(event: { currentTarget: HTMLInputElement }) {
+    const input = event.currentTarget;
+    const files = input.files;
+    if (files) {
+      console.log(files.length);
+    }
+  }
+
   function handleSort(option: string) {
     filteredFiles = filteredFiles.sort((a, b) => {
       var val = 0;
@@ -92,7 +100,7 @@
           type="text"
           bind:value={searchQuery}
           placeholder="Search files..."
-          class="block w-full rounded-lg border border-gray-700 bg-gray-800 p-2.5 pl-10 text-sm text-white placeholder-gray-400 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+          class="block w-40 md:w-full rounded-lg border border-gray-700 bg-gray-800 p-2.5 pl-10 text-sm text-white placeholder-gray-400 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
         />
       </div>
 
@@ -130,6 +138,23 @@
 
     <div class="flex items-center gap-2">
       <button
+        class={"rounded-md p-2 pb-0.5  hover:bg-gray-700  hover:text-cyan-400  text-gray-400"}
+        on:click={() => {
+          document.getElementById("songInput")?.click();
+        }}
+        title="Upload file"
+      >
+        <input
+          id="songInput"
+          type="file"
+          accept="audio/*"
+          style="display: none;"
+          on:change={handleFileUpload}
+          multiple
+        />
+        <span class="material-symbols-outlined">upload</span>
+      </button>
+      <button
         class={`rounded-md p-2 pb-0.5 ${viewMode === "grid" ? "bg-gray-700  text-cyan-400" : "text-gray-400"}`}
         on:click={() => fileStore.changeLayout("grid")}
         title="Grid view"
@@ -162,24 +187,24 @@
     <!-- Grid View -->
     {#if viewMode === "grid"}
       <div
-        class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+        class="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
       >
         {#each filteredFiles as file, index}
           <div
-            class="group cursor-pointer rounded-lg bg-gray-800 p-4 transition-all hover:bg-gray-700 w-58"
+            class="group cursor-pointer rounded-lg bg-gray-800 p-3 transition-all hover:bg-gray-700 w-50% md:w-48"
             on:click={() => onFileSelect(file, index)}
             on:keydown={(e) => e.key === "Enter" && onFileSelect(file, index)}
             role="button"
             tabindex="0"
           >
             <div
-              class="mb-2 flex h-50 w-50 items-center justify-center rounded bg-gray-900 text-cyan-500"
+              class="mb-2 flex h-40 md:h-42 w-full items-center justify-center rounded bg-gray-900 text-cyan-500 overflow-hidden"
             >
               <LazyImage
                 bind:this={imageRefs[index]}
                 src={`/api/cover/get/${file.uid}`}
                 alt={file.metadata.title}
-                className="overflow-hidden select-none rounded"
+                className="max-w-full max-h-full object-contain"
               />
             </div>
             <div
