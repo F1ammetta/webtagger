@@ -114,7 +114,6 @@ func watchLoop(w *fsnotify.Watcher) {
 
 			}
 
-			infoLog(fmt.Sprintf("%s", e))
 		}
 	}
 }
