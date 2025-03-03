@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/fsnotify/fsnotify"
 )
 
 var exts = []string{
@@ -17,6 +19,53 @@ var exts = []string{
 var id = ""
 
 var fileChan chan (File)
+
+func fswatch() {
+	w, err := fsnotify.NewWatcher()
+
+	if err != nil {
+		errLog(err, "Couldn't start fs watcher")
+	}
+
+	go watchLoop(w)
+
+	if err := w.Add(musicDir); err != nil {
+		errLog(err, "Couldn't add music path to fs watcher")
+	}
+
+}
+
+func watchLoop(w *fsnotify.Watcher) {
+	defer w.Close()
+	for {
+		// TODO: Handle unwanted events created from editing files
+		// NOTE: Maybe use a channel from the event loop to notify file editings
+		select {
+		case err, ok := <-w.Errors:
+			if !ok {
+				break
+			}
+			errLog(err, "Watcher")
+		case e, ok := <-w.Events:
+			if !ok {
+				break
+			}
+			switch e.Op {
+			case fsnotify.Create:
+				// TODO: Handle File Creation
+
+			case fsnotify.Remove:
+				// TODO: Handle File Removal
+
+			case fsnotify.Rename:
+				// TODO: Handle File Renaming
+
+			}
+
+			infoLog(fmt.Sprintf("%s", e))
+		}
+	}
+}
 
 func walkHandler(path string, d fs.DirEntry, err error) error {
 	info, err := d.Info()
