@@ -76,7 +76,6 @@ const (
 
 func getCover(filePath string) ([]byte, error) {
 	filePath = musicDir + filePath
-	infoLog(filePath)
 	cmd := exec.Command(
 		"tageditor",
 		"-e",
