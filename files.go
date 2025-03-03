@@ -5,9 +5,11 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -53,12 +55,77 @@ func watchLoop(w *fsnotify.Watcher) {
 			switch e.Op {
 			case fsnotify.Create:
 				// TODO: Handle File Creation
+				<-time.After(time.Millisecond * 100)
+				path := e.Name
 
+				ext := strings.Split(e.Name, ".")
+				if !slices.Contains(exts, ext[len(ext)-1]) {
+					continue
+				}
+
+				fd, err := os.Open(path)
+
+				if err != nil {
+					errLog(err)
+				}
+
+				// var file File
+
+				info, err := fd.Stat()
+
+				if err != nil {
+					errLog(err)
+				}
+
+				var file File
+				file.Name = info.Name()
+				file.Size = float32(info.Size()) / 1000_000
+
+				hash := sha256.New()
+				hash.Write([]byte(file.Name))
+				hashed := hash.Sum(nil)
+
+				uid := hex.EncodeToString(hashed)
+
+				file.Uid = uid
+				file.Metadata, err = gatherMetadata(path)
+				file.Deleted = false
+
+				noChan := make(chan DbResult, 1)
+
+				event := DbEvent{
+					eventType:  Insert,
+					data:       file,
+					resultChan: noChan,
+				}
+
+				go dispatch(event)
 			case fsnotify.Remove:
 				// TODO: Handle File Removal
+				dirs := strings.Split(e.Name, "/")
+				name := dirs[len(dirs)-1]
+				hash := sha256.New()
+				hash.Write([]byte(name))
+				hashed := hash.Sum(nil)
 
+				uid := hex.EncodeToString(hashed)
+
+				ext := strings.Split(e.Name, ".")
+				if !slices.Contains(exts, ext[len(ext)-1]) {
+					continue
+				}
+
+				noChan := make(chan DbResult, 1)
+
+				event := DbEvent{
+					eventType:  Delete,
+					data:       uid,
+					resultChan: noChan,
+				}
+
+				go dispatch(event)
 			case fsnotify.Rename:
-				// TODO: Handle File Renaming
+				// TODO: Handle File Renaming, or don't
 
 			}
 
@@ -87,23 +154,19 @@ func walkHandler(path string, d fs.DirEntry, err error) error {
 		return nil
 	}
 
-	name := info.Name()
-
-	size := float32(info.Size()) / 1000_000
+	var file File
+	file.Name = info.Name()
+	file.Size = float32(info.Size()) / 1000_000
 
 	hash := sha256.New()
-	hash.Write([]byte(name))
+	hash.Write([]byte(file.Name))
 	hashed := hash.Sum(nil)
 
 	uid := hex.EncodeToString(hashed)
 
-	id = uid
-
-	metadata, err := gatherMetadata(path)
-
-	file := File{
-		Name: name, Size: size, Uid: uid, Metadata: metadata, Deleted: false,
-	}
+	file.Uid = uid
+	file.Metadata, err = gatherMetadata(path)
+	file.Deleted = false
 
 	noChan := make(chan DbResult, 1)
 
