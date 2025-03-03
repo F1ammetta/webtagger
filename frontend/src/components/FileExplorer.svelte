@@ -51,6 +51,7 @@
     const input = event.currentTarget;
     const files = input.files;
     if (files) {
+      isLoading = true;
       fileStore.upload(files);
     }
   }
