@@ -2,7 +2,10 @@ module webtagger
 
 go 1.23.5
 
-require github.com/ostafen/clover v1.2.0
+require (
+	github.com/fsnotify/fsnotify v1.4.7
+	github.com/ostafen/clover v1.2.0
+)
 
 require (
 	github.com/cespare/xxhash v1.1.0 // indirect
