@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import type { MusicFile, CoverUpdate, CoverReq } from "../types";
+import type { MusicFile, CoverUpdate, CoverReq, FileUpload } from "../types";
 
 interface FileState {
   files: MusicFile[];
@@ -69,6 +69,47 @@ function createFileStore() {
           loading: false,
           error: "Failed to load music files. Please try again.",
         }));
+      }
+    },
+    upload: async (list: FileList) => {
+      let files = Array.from(list);
+      try {
+        const uploadPromises = files.map(async (file) => {
+          // Create a new FormData instance for each file
+          const formData = new FormData();
+
+          // Add the file directly - no need for manual base64 conversion
+          formData.append('data', file);
+
+          // Add additional metadata if needed
+          formData.append('name', file.name);
+
+
+          // Send the request
+          const response = await fetch('http://localhost:8080/upload/', {
+            method: 'POST',
+            body: formData,
+            // No need to set Content-Type header - browser sets it automatically with boundary
+          });
+
+          if (!response.ok) {
+            throw new Error(`Upload failed with status: ${response.status}`);
+          }
+
+          return {
+            fileName: file.name,
+            status: response.status,
+            data: await response.json() // Assuming server returns JSON
+          };
+        });
+
+        // Wait for all uploads to complete
+        const results = await Promise.all(uploadPromises);
+        console.log('All uploads completed successfully:', results);
+        return results;
+      } catch (error) {
+        console.error('Upload process failed:', error);
+        throw error; // Re-throw to allow caller to handle
       }
     },
     updateFile: async (updatedFile: MusicFile, cover: CoverUpdate) => {
