@@ -166,7 +166,6 @@ func handleEvent(db *clover.DB, event DbEvent) {
 			}
 		}
 
-		return
 	case Query:
 		uid := event.data.(string)
 
@@ -181,13 +180,13 @@ func handleEvent(db *clover.DB, event DbEvent) {
 				err:  nil,
 			}
 		}
-		return
+
 	case All:
 		result <- DbResult{
 			data: getSongs(db),
 			err:  nil,
 		}
-		return
+
 	case Edit:
 		file := event.data.(File)
 		uid := file.Uid
@@ -203,16 +202,24 @@ func handleEvent(db *clover.DB, event DbEvent) {
 				err:  nil,
 			}
 		}
-		return
+
 	case Delete:
+		uid := event.data.(string)
+		deleteSong(db, uid)
+		result <- DbResult{
+			data: nil,
+			err:  nil,
+		}
 
 	case Scan:
 		flagFiles(db)
 		cleanChan := make(chan struct{})
 		go scanner(cleanChan)
 		go clean(cleanChan)
+
 	case Clean:
 		cleaner(db)
+
 	}
 }
 
@@ -241,6 +248,14 @@ func clean(cleanChan chan struct{}) {
 
 	dispatch(ev)
 	<-resChan
+}
+
+func deleteSong(db *clover.DB, uid string) {
+	query := db.Query("songs")
+
+	if err := query.Where(clover.Field("Uid").Eq(uid)).Delete(); err != nil {
+		fmt.Println(err)
+	}
 }
 
 func flagFiles(db *clover.DB) {
