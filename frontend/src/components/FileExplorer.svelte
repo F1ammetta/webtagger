@@ -51,7 +51,7 @@
     const input = event.currentTarget;
     const files = input.files;
     if (files) {
-      console.log(files.length);
+      fileStore.upload(files);
     }
   }
 
