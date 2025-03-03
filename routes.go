@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -28,6 +29,66 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
 	dispatch(scanEvent)
 
 	w.Write([]byte("{\"status\": \"scanning\"}"))
+}
+
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	infoLog("Incoming POST @ /upload")
+
+	// Set response headers for JSON
+	w.Header().Set("Content-Type", "application/json")
+
+	// Parse the multipart form
+	err := r.ParseMultipartForm(0) // 0 means no limit
+	if err != nil {
+		errLog(err, "Failed to parse multipart form")
+		http.Error(w, `{"success":false,"error":"Failed to parse form"}`, http.StatusBadRequest)
+		return
+	}
+
+	// Get the file from the request
+	file, header, err := r.FormFile("data")
+	if err != nil {
+		errLog(err, "Failed to get file from form")
+		http.Error(w, `{"success":false,"error":"No file found in request"}`, http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	// Get the filename - either from the form field or from the file header
+	fileName := r.FormValue("name")
+	if fileName == "" {
+		fileName = header.Filename
+	}
+
+	// Make sure the directory exists
+	if err := os.MkdirAll(filepath.Dir(musicDir+fileName), 0755); err != nil {
+		errLog(err, "Couldn't create directory")
+		http.Error(w, `{"success":false,"error":"Failed to create directory"}`, http.StatusInternalServerError)
+		return
+	}
+
+	// Create the destination file
+	dst, err := os.Create(musicDir + fileName)
+	if err != nil {
+		errLog(err, "Couldn't create file")
+		http.Error(w, `{"success":false,"error":"Failed to create file"}`, http.StatusInternalServerError)
+		return
+	}
+	defer dst.Close()
+
+	// Copy the file data to the destination
+	_, err = io.Copy(dst, file)
+	if err != nil {
+		errLog(err, "Failed to save file")
+		http.Error(w, `{"success":false,"error":"Failed to save file"}`, http.StatusInternalServerError)
+		return
+	}
+
+	// Log success
+	infoLog(fmt.Sprintf("File uploaded successfully: %s", fileName))
+
+	// Return success response
+	w.Write([]byte(`{"success":true,"message":"File uploaded successfully"}`))
 }
 
 func editHandler(w http.ResponseWriter, r *http.Request) {
