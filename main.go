@@ -49,6 +49,8 @@ func main() {
 
 	<-time.After(time.Second)
 
+	fswatch()
+
 	http.HandleFunc("/songs", songsHandler)
 	http.HandleFunc("/scan", scanHandler)
 	http.HandleFunc("/cover/get/{uid}", coverHandler)
