@@ -1,19 +1,14 @@
 package main
 
 import (
-	// "errors"
 	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
-	// "strconv"
-	// "github.com/ostafen/clover"
 )
 
 const musicDir = "/home/fiammetta/Music/"
-
-// const musicDir = "./"
 
 const (
 	scanning = "scanning"
@@ -48,6 +43,18 @@ func main() {
 	go eventLoop(ctx)
 
 	<-time.After(time.Second)
+
+	result := make(chan (DbResult), 1)
+
+	scanEvent := DbEvent{
+		eventType:  Scan,
+		data:       nil,
+		resultChan: result,
+	}
+
+	dispatch(scanEvent)
+
+	<-result
 
 	fswatch()
 
