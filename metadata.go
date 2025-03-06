@@ -12,7 +12,7 @@ import (
 func setCover(filePath string, coverPath string) error {
 	cover := fmt.Sprintf("cover=%s", coverPath)
 
-	cmd := exec.Command("tageditor",
+	cmd := exec.Command("./result/bin/tageditor",
 		"-s",
 		cover,
 		"--max-padding", "100000",
@@ -39,7 +39,7 @@ func editMetadata(filePath string, m Meta) error {
 	genre := fmt.Sprintf("genre=%s", m.Genre)
 	year := fmt.Sprintf("year=%d", m.Year)
 
-	cmd := exec.Command("tageditor",
+	cmd := exec.Command("./result/bin/tageditor",
 		"-s",
 		title,
 		artist,
@@ -77,7 +77,7 @@ const (
 func getCover(filePath string) ([]byte, error) {
 	filePath = musicDir + filePath
 	cmd := exec.Command(
-		"tageditor",
+		"./result/bin/tageditor",
 		"-e",
 		"cover",
 		"-f",

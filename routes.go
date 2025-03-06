@@ -247,6 +247,7 @@ func coverHandler(w http.ResponseWriter, r *http.Request) {
 	cover, err := getCover(file.Name)
 
 	if err != nil {
+		errLog(err, "Couldn't fetch cover")
 		file, err := os.ReadFile("./album.svg")
 		if err != nil {
 			errLog(err, "Couldn't fetch cover")

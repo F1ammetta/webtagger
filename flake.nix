@@ -8,7 +8,7 @@
   outputs =
     { self, nixpkgs }:
     let
-      armPkgs = nixpkgs.legacyPackages.aarch-linux;
+      armPkgs = nixpkgs.legacyPackages.aarch64-linux;
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
 
       armDeps = with armPkgs; [
@@ -28,13 +28,30 @@
     in
     {
 
-      devShells.aarch-linux.default = armPkgs.mkShell {
+      devShells.aarch64-linux.default = armPkgs.mkShell {
         packages = armDeps;
       };
 
       devShells.x86_64-linux.default = pkgs.mkShell {
         packages = deps;
       };
+
+      defaultPackage.aarch64-linux = let 
+      yggdrasil = armPkgs.buildGoModule {
+        name = "Yggdrasil";
+
+        src = ./.;
+        vendorHash = null;
+      };
+      in armPkgs.runCommand "yggdrasil-with-deps" {
+        nativeBuildInputs = [ armPkgs.makeWrapper ];
+      } ''
+      mkdir -p $out/bin
+      cp ${yggdrasil}/bin/webtagger $out/bin/webtagger
+      ln -s ${armPkgs.tageditor}/bin/tageditor $out/bin/tageditor
+      ln -s ${armPkgs.ffmpeg}/bin/ffmpeg $out/bin/ffmpeg
+        '';
+
 
     };
 }

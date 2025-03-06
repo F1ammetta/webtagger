@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const musicDir = "/home/fiammetta/Music/"
+const musicDir = "/srv/music/"
 
 const (
 	scanning = "scanning"
@@ -44,17 +44,17 @@ func main() {
 
 	<-time.After(time.Second)
 
-	result := make(chan (DbResult), 1)
-
-	scanEvent := DbEvent{
-		eventType:  Scan,
-		data:       nil,
-		resultChan: result,
-	}
-
-	dispatch(scanEvent)
-
-	<-result
+	// result := make(chan (DbResult), 1)
+	//
+	// scanEvent := DbEvent{
+	// 	eventType:  Scan,
+	// 	data:       nil,
+	// 	resultChan: result,
+	// }
+	//
+	// dispatch(scanEvent)
+	//
+	// <-result
 
 	fswatch()
 
@@ -66,7 +66,7 @@ func main() {
 	http.HandleFunc("/upload", uploadHandler)
 
 	fmt.Println("listening on http://localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":6008", nil)
 
 	// song := songInDb(db, "c1e9f5258e12594a710166176e8bdc2d6f415455937ec3aa9362a21f284a2b08")
 }
