@@ -21,7 +21,6 @@
   function closeTagEditor() {
     isTagEditorOpen = false;
     selectedFile = null;
-    fileExplorer.reloadImage(idx);
   }
 
   onMount(() => {
@@ -31,9 +30,9 @@
 </script>
 
 <div class="flex h-screen flex-col">
-  <Navbar />
+  <!-- <Navbar /> -->
 
-  <main class="flex-1 overflow-y-auto">
+  <main class="flex-1 pt-13 overflow-y-auto">
     <div class="container mx-auto max-w-7xl px-4 py-6 pb-40">
       <FileExplorer bind:this={fileExplorer} onFileSelect={handleFileSelect} />
     </div>
@@ -46,6 +45,9 @@
       onSave={async (updatedFile, cover) => {
         await fileStore.updateFile(updatedFile, cover);
         closeTagEditor();
+        if (cover.update) {
+          fileExplorer.reloadImage(idx);
+        }
       }}
     />
   {/if}

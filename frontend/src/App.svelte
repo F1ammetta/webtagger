@@ -5,7 +5,7 @@
   import Login from "./routes/Login.svelte";
   import Dashboard from "./routes/Dashboard.svelte";
   import NotFound from "./routes/NotFound.svelte";
-  import ProtectedRoute from "./components/ProtectedRoute.svelte";
+  // import ProtectedRoute from "./components/ProtectedRoute.svelte";
 
   export let url = "";
   let isLoading = true;
@@ -27,7 +27,7 @@
   <Router {url}>
     <div class="min-h-screen bg-gray-900 text-gray-100">
       <Route path="/login" component={Login} />
-      <Route path="/" component={ProtectedRoute} />
+      <Route path="/" component={Dashboard} />
       <Route path="*" component={NotFound} />
     </div>
   </Router>
